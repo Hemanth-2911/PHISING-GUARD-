@@ -1,0 +1,353 @@
+[
+  {
+    "id": "613f6631-9195-486b-ab31-687b65687901",
+    "url": "https://www.amazon.in/s?k=rewards+of+amazon+pay+my+reward&adgrpid=1324913116860491&hvadid=82807336473998&hvbmt=bp&hvdev=c&hvlocphy=155595&hvnetw=o&hvqmt=p&hvtargid=kwd-82807949239376%3Aloc-90&hydadcr=16133_2338362&mcid=5a53da050d063cf081b06bc41405781d&msclkid=eda893218a93191d5d67f9b08fa1239a&tag=msndeskstdin-21&ref=pd_sl_fs8kukvhr_p",
+    "domain": "amazon.in",
+    "verdict": {
+      "score": 9,
+      "riskLevel": "safe",
+      "riskLabel": "SAFE",
+      "checkedLayers": 4,
+      "totalLayers": 5,
+      "checkedPercent": 80,
+      "disclaimer": "This result is based on 4 of 5 detection layers. Automated URL analysis cannot guarantee 100% accuracy. Always verify suspicious URLs through official channels before entering credentials."
+    },
+    "layers": [
+      {
+        "name": "Google Safe Browsing v4",
+        "status": "skipped",
+        "confidence": 0,
+        "weight": 35,
+        "details": "API key not configured — set GOOGLE_SB_API_KEY environment variable"
+      },
+      {
+        "name": "Domain Age (RDAP)",
+        "status": "clean",
+        "confidence": 5,
+        "weight": 20,
+        "details": "No RDAP data available for this domain"
+      },
+      {
+        "name": "TLS Certificate Inspection",
+        "status": "clean",
+        "confidence": 75,
+        "weight": 15,
+        "details": "Valid certificate from DigiCert Inc, expires Nov 13 23:59:59 2026 GMT (77 days)"
+      },
+      {
+        "name": "Lexical & Structural Heuristics",
+        "status": "warning",
+        "confidence": 46.5,
+        "weight": 30,
+        "details": [
+          "Brand impersonation detected: \"amazon\" in domain",
+          "Long URL: 334 characters",
+          "1 suspicious query parameters"
+        ]
+      },
+      {
+        "name": "Injection & Malware Detection",
+        "status": "clean",
+        "confidence": 70,
+        "weight": 10,
+        "details": [
+          "No injection patterns or malware signatures detected"
+        ]
+      }
+    ],
+    "injection": {
+      "sql": {
+        "name": "SQL Injection",
+        "detected": false,
+        "count": 0,
+        "severity": 85,
+        "matches": []
+      },
+      "xss": {
+        "name": "Cross-Site Scripting",
+        "detected": false,
+        "count": 0,
+        "severity": 80,
+        "matches": []
+      },
+      "cmd": {
+        "name": "Command Injection",
+        "detected": false,
+        "count": 0,
+        "severity": 90,
+        "matches": []
+      },
+      "path": {
+        "name": "Path Traversal",
+        "detected": false,
+        "count": 0,
+        "severity": 75,
+        "matches": []
+      },
+      "malware": {
+        "name": "Malware Payload",
+        "detected": false,
+        "count": 0,
+        "severity": 88,
+        "matches": []
+      },
+      "exfil": {
+        "name": "Data Exfiltration",
+        "detected": false,
+        "count": 0,
+        "severity": 82,
+        "matches": []
+      }
+    },
+    "knownThreat": false,
+    "description": {
+      "title": "Safe — No Threats Detected",
+      "summary": "This URL passes all available security checks. The domain has a verified reputation, the TLS certificate is valid, and no suspicious patterns were found. This site appears safe to visit.",
+      "assurance": "STANDARD ASSURANCE",
+      "assuranceDetail": "The detection layers that were checked all returned clean results. Note: \"safe\" means no threats were detected by our current analysis — it is not an absolute guarantee of safety.",
+      "color": "#10b981",
+      "threats": [],
+      "warnings": [
+        "Lexical & Structural Heuristics"
+      ]
+    },
+    "elapsed": 2007,
+    "timestamp": "2026-08-28T03:50:52.434Z"
+  },
+  {
+    "id": "a2cbf90f-feb6-4135-bd9c-6af423464021",
+    "url": "https://secure-paypal-login.xyz/auth?id=1%27%20OR%201=1--",
+    "domain": "secure-paypal-login.xyz",
+    "verdict": {
+      "score": 61,
+      "riskLevel": "high",
+      "riskLabel": "HIGH",
+      "checkedLayers": 3,
+      "totalLayers": 5,
+      "checkedPercent": 60,
+      "disclaimer": "This result is based on 3 of 5 detection layers. Automated URL analysis cannot guarantee 100% accuracy. Always verify suspicious URLs through official channels before entering credentials."
+    },
+    "layers": [
+      {
+        "name": "Google Safe Browsing v4",
+        "status": "skipped",
+        "confidence": 0,
+        "weight": 35,
+        "details": "API key not configured — set GOOGLE_SB_API_KEY environment variable"
+      },
+      {
+        "name": "Domain Age (RDAP)",
+        "status": "error",
+        "confidence": 0,
+        "weight": 20,
+        "details": "RDAP lookup failed: getaddrinfo EAI_AGAIN rdap.nic.xyz"
+      },
+      {
+        "name": "TLS Certificate Inspection",
+        "status": "warning",
+        "confidence": 10,
+        "weight": 15,
+        "details": "TLS inspection failed: getaddrinfo ENOTFOUND secure-paypal-login.xyz"
+      },
+      {
+        "name": "Lexical & Structural Heuristics",
+        "status": "threat",
+        "confidence": 78,
+        "weight": 30,
+        "details": [
+          "Suspicious TLD: .xyz",
+          "Brand impersonation detected: \"paypal\" in domain",
+          "2 hyphens in domain",
+          "Login keywords in domain: login, secure, pay",
+          "High domain entropy: 4.00"
+        ]
+      },
+      {
+        "name": "Injection & Malware Detection",
+        "status": "threat",
+        "confidence": 95,
+        "weight": 10,
+        "details": [
+          "DOMAIN FOUND IN KNOWN THREAT DATABASE — confirmed malicious"
+        ]
+      }
+    ],
+    "injection": {
+      "sql": {
+        "name": "SQL Injection",
+        "detected": true,
+        "count": 1,
+        "severity": 85,
+        "matches": [
+          {
+            "pattern": "or\\s+1\\s*=\\s*1",
+            "matched": "OR 1=1"
+          }
+        ]
+      },
+      "xss": {
+        "name": "Cross-Site Scripting",
+        "detected": false,
+        "count": 0,
+        "severity": 80,
+        "matches": []
+      },
+      "cmd": {
+        "name": "Command Injection",
+        "detected": false,
+        "count": 0,
+        "severity": 90,
+        "matches": []
+      },
+      "path": {
+        "name": "Path Traversal",
+        "detected": false,
+        "count": 0,
+        "severity": 75,
+        "matches": []
+      },
+      "malware": {
+        "name": "Malware Payload",
+        "detected": false,
+        "count": 0,
+        "severity": 88,
+        "matches": []
+      },
+      "exfil": {
+        "name": "Data Exfiltration",
+        "detected": false,
+        "count": 0,
+        "severity": 82,
+        "matches": []
+      }
+    },
+    "knownThreat": true,
+    "description": {
+      "title": "High Risk — Likely Threat",
+      "summary": "This URL shows significant suspicious characteristics. At least one major detection layer has identified threat indicators. Exercise extreme caution — do not enter credentials or download files. This domain is listed in known threat intelligence databases as confirmed malicious.",
+      "assurance": "MODERATE-HIGH ASSURANCE",
+      "assuranceDetail": "The primary detection signals converge on a high-risk verdict. While not every layer confirmed the threat, the available evidence strongly suggests malicious intent.",
+      "color": "#f59e0b",
+      "threats": [
+        "Lexical & Structural Heuristics",
+        "Injection & Malware Detection"
+      ],
+      "warnings": [
+        "TLS Certificate Inspection"
+      ]
+    },
+    "elapsed": 2657,
+    "timestamp": "2026-08-28T03:47:36.782Z"
+  },
+  {
+    "id": "c0b98ebb-9b9d-4e68-9077-39b9b5e3bca4",
+    "url": "https://www.netflix.com/",
+    "domain": "netflix.com",
+    "verdict": {
+      "score": 0,
+      "riskLevel": "safe",
+      "riskLabel": "SAFE",
+      "checkedLayers": 4,
+      "totalLayers": 5,
+      "checkedPercent": 80,
+      "disclaimer": "This result is based on 4 of 5 detection layers. Automated URL analysis cannot guarantee 100% accuracy. Always verify suspicious URLs through official channels before entering credentials."
+    },
+    "layers": [
+      {
+        "name": "Google Safe Browsing v4",
+        "status": "skipped",
+        "confidence": 0,
+        "weight": 35,
+        "details": "API key not configured — set GOOGLE_SB_API_KEY environment variable"
+      },
+      {
+        "name": "Domain Age (RDAP)",
+        "status": "clean",
+        "confidence": 5,
+        "weight": 20,
+        "details": "No RDAP data available for this domain"
+      },
+      {
+        "name": "TLS Certificate Inspection",
+        "status": "clean",
+        "confidence": 75,
+        "weight": 15,
+        "details": "Valid certificate from DigiCert Inc, expires Feb 18 21:41:48 2027 GMT (174 days)"
+      },
+      {
+        "name": "Lexical & Structural Heuristics",
+        "status": "clean",
+        "confidence": 95,
+        "weight": 30,
+        "details": [
+          "Trusted domain: netflix.com"
+        ]
+      },
+      {
+        "name": "Injection & Malware Detection",
+        "status": "clean",
+        "confidence": 70,
+        "weight": 10,
+        "details": [
+          "No injection patterns or malware signatures detected"
+        ]
+      }
+    ],
+    "injection": {
+      "sql": {
+        "name": "SQL Injection",
+        "detected": false,
+        "count": 0,
+        "severity": 85,
+        "matches": []
+      },
+      "xss": {
+        "name": "Cross-Site Scripting",
+        "detected": false,
+        "count": 0,
+        "severity": 80,
+        "matches": []
+      },
+      "cmd": {
+        "name": "Command Injection",
+        "detected": false,
+        "count": 0,
+        "severity": 90,
+        "matches": []
+      },
+      "path": {
+        "name": "Path Traversal",
+        "detected": false,
+        "count": 0,
+        "severity": 75,
+        "matches": []
+      },
+      "malware": {
+        "name": "Malware Payload",
+        "detected": false,
+        "count": 0,
+        "severity": 88,
+        "matches": []
+      },
+      "exfil": {
+        "name": "Data Exfiltration",
+        "detected": false,
+        "count": 0,
+        "severity": 82,
+        "matches": []
+      }
+    },
+    "knownThreat": false,
+    "description": {
+      "title": "Safe — No Threats Detected",
+      "summary": "This URL passes all available security checks. The domain has a verified reputation, the TLS certificate is valid, and no suspicious patterns were found. This site appears safe to visit.",
+      "assurance": "STANDARD ASSURANCE",
+      "assuranceDetail": "The detection layers that were checked all returned clean results. Note: \"safe\" means no threats were detected by our current analysis — it is not an absolute guarantee of safety.",
+      "color": "#10b981",
+      "threats": [],
+      "warnings": []
+    },
+    "elapsed": 649,
+    "timestamp": "2026-08-28T03:47:28.167Z"
+  }
+]

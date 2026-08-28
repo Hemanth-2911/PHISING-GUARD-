@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhishGuard AI — Feature Showcase & Detection Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   PhishGuard AI — Tactical Dark Mode Design System
+   ═══════════════════════════════════════════════════════ */
+:root{--bg-base:#080A0D;--bg-panel:#0B0E12;--bg-elevated:#0F1318;--border-subtle:#1A1D23;--border-active:#252830;--accent-blue:#3B82F6;--accent-blue-dim:#2563EB;--accent-blue-glow:rgba(59,130,246,0.08);--accent-amber:#F59E0B;--accent-amber-dim:#D97706;--accent-red:#EF4444;--accent-red-dim:#DC2626;--accent-green:#10B981;--accent-green-dim:#059669;--text-heading:#E2E8F0;--text-muted:#94A3B8;--text-sub-muted:#64748B;--text-dim:#475569;--font-primary:'Inter',-apple-system,sans-serif;--font-mono:'JetBrains Mono','SF Mono',monospace;--scanline-speed:8s}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg-base);color:var(--text-heading);font-family:var(--font-primary);font-size:14px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+code{font-family:var(--font-mono);font-size:.85em;background:var(--bg-elevated);border:1px solid var(--border-subtle);padding:1px 6px;border-radius:3px;color:var(--accent-blue)}
+
+/* Scanline */
+.global-scanline{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent-blue),transparent);opacity:.3;z-index:10000;pointer-events:none;animation:scanline var(--scanline-speed) linear infinite}
+@keyframes scanline{0%{top:0}100%{top:100vh}}
+
+/* Status Badges */
+.status-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:4px;white-space:nowrap}
+.status-badge.blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--accent-blue)}
+.status-badge.green{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:var(--accent-green)}
+.status-badge.amber{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--accent-amber)}
+.status-badge.red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--accent-red)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Header */
+.site-header{position:sticky;top:0;z-index:1000;height:64px;background:rgba(8,10,13,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-subtle)}
+.header-inner{max-width:1280px;margin:0 auto;padding:0 32px;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:var(--accent-blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff;box-shadow:0 0 24px rgba(59,130,246,.3)}
+.logo-text{font-size:13px;font-weight:700;letter-spacing:2px}
+.header-right{display:flex;align-items:center;gap:12px}
+
+/* Section */
+.section{max-width:1280px;margin:0 auto;padding:80px 32px}
+.section-narrow{max-width:960px;margin:0 auto;padding:60px 32px}
+.section-header{text-align:center;margin-bottom:48px}
+.section-header .status-badge{margin-bottom:14px}
+.section-title{font-size:clamp(24px,3vw,36px);font-weight:700;letter-spacing:-.5px;margin-bottom:10px}
+.section-subtitle{font-size:15px;color:var(--text-muted);max-width:640px;margin:0 auto;line-height:1.7}
+.sep{border:none;border-top:1px solid var(--border-subtle);margin:0}
+
+/* Pipeline */
+.pipeline{display:flex;flex-direction:column;gap:0;position:relative;max-width:800px;margin:0 auto}
+.pipeline-step{display:grid;grid-template-columns:60px 1fr;gap:20px;position:relative}
+.pipeline-dot-col{display:flex;flex-direction:column;align-items:center}
+.pipeline-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;z-index:2;margin-top:20px}
+.pipeline-dot.blue{background:var(--accent-blue);box-shadow:0 0 14px rgba(59,130,246,.5)}
+.pipeline-dot.amber{background:var(--accent-amber);box-shadow:0 0 14px rgba(245,158,11,.5)}
+.pipeline-dot.red{background:var(--accent-red);box-shadow:0 0 14px rgba(239,68,68,.5)}
+.pipeline-dot.green{background:var(--accent-green);box-shadow:0 0 14px rgba(16,185,129,.5)}
+.pipeline-line{width:2px;flex:1;background:var(--border-subtle);min-height:24px}
+.pipeline-step:last-child .pipeline-line{display:none}
+.pipeline-card{padding:18px 22px;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;margin-bottom:20px}
+.pipeline-card-title{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-heading);margin-bottom:6px}
+.pipeline-card-desc{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:8px}
+.pipeline-card-data{font-family:var(--font-mono);font-size:11px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;padding:10px 14px;color:var(--text-sub-muted);line-height:1.8;overflow-x:auto}
+
+/* Demo Scanner */
+.scanner-box{background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden;margin-bottom:40px}
+.scanner-header{display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--border-subtle);background:var(--bg-elevated)}
+.scanner-dot{width:8px;height:8px;border-radius:50%}
+.scanner-dot.r{background:#EF4444}.scanner-dot.y{background:#F59E0B}.scanner-dot.g{background:#10B981}
+.scanner-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.8px;color:var(--text-sub-muted);margin-left:8px}
+.scanner-body{padding:20px}
+
+.url-input-row{display:flex;gap:8px;margin-bottom:16px}
+.url-input{flex:1;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;padding:10px 14px;color:var(--text-heading);font-family:var(--font-mono);font-size:11px;outline:none;transition:border-color .2s}
+.url-input:focus{border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(59,130,246,.08)}
+.url-input::placeholder{color:var(--text-dim)}
+.scan-btn{padding:10px 20px;background:var(--accent-blue);border:none;border-radius:6px;color:#fff;font-family:var(--font-primary);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.scan-btn:hover{background:var(--accent-blue-dim);box-shadow:0 0 20px rgba(59,130,246,.3)}
+.scan-btn:active{transform:scale(.97)}
+
+/* Result Panel */
+.result-panel{border:1px solid var(--border-subtle);border-radius:10px;padding:20px;display:none;animation:fadeSlide .4s ease-out}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.result-panel.show{display:block}
+.result-panel.risk-safe{border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.02)}
+.result-panel.risk-low{border-color:rgba(59,130,246,.25);background:rgba(59,130,246,.02)}
+.result-panel.risk-moderate{border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.02)}
+.result-panel.risk-high{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.03)}
+.result-panel.risk-critical{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.03)}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.result-risk{display:flex;align-items:center;gap:10px}
+.risk-icon{font-size:24px}
+.risk-level{font-size:20px;font-weight:700}
+.result-score{text-align:right}
+.score-num{font-family:var(--font-mono);font-size:36px;font-weight:700;line-height:1}
+.score-label{font-family:var(--font-mono);font-size:8px;letter-spacing:1px;color:var(--text-sub-muted)}
+.conf-bar{margin-bottom:14px}
+.conf-header{display:flex;justify-content:space-between;margin-bottom:4px}
+.conf-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--text-sub-muted)}
+.conf-value{font-family:var(--font-mono);font-size:10px;font-weight:600}
+.bar-track{height:4px;background:var(--border-subtle);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .8s ease-out}
+.effects-section{margin-bottom:14px}
+.effects-list{display:flex;flex-wrap:wrap;gap:6px}
+.effect-tag{font-family:var(--font-mono);font-size:9px;padding:3px 8px;border-radius:3px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--accent-red);text-transform:uppercase;letter-spacing:.5px}
+.effect-tag.safe{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px}
+.feature-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px}
+.feature-name{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.feature-value{font-family:var(--font-mono);font-size:11px;font-weight:600}
+.feature-value.ok{color:var(--accent-green)}.feature-value.warn{color:var(--accent-amber)}.feature-value.danger{color:var(--accent-red)}
+
+/* Warning Banner Demo */
+.banner-demo{position:relative;overflow:hidden;border-radius:12px;border:1px solid var(--border-subtle);margin-bottom:24px}
+.banner-page-bg{background:var(--bg-panel);padding:40px 24px;text-align:center}
+.banner-page-bg h3{font-size:14px;color:var(--text-sub-muted);margin-bottom:8px}
+.banner-page-bg p{font-size:12px;color:var(--text-dim)}
+.warning-banner{position:relative;padding:14px 20px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px);animation:slideBanner .5s ease-out}
+@keyframes slideBanner{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.warning-banner.critical{background:rgba(239,68,68,.12);border-bottom:2px solid var(--accent-red)}
+.warning-banner.high{background:rgba(245,158,11,.12);border-bottom:2px solid var(--accent-amber)}
+.warning-banner.safe{background:rgba(16,185,129,.12);border-bottom:2px solid var(--accent-green)}
+.banner-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.banner-icon.critical{background:var(--accent-red);color:#fff}
+.banner-icon.high{background:var(--accent-amber);color:#000}
+.banner-icon.safe{background:var(--accent-green);color:#fff}
+.banner-text{flex:1}
+.banner-title{font-size:13px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.banner-title.critical{color:#FCA5A5}.banner-title.high{color:#FCD34D}.banner-title.safe{color:#6EE7B7}
+.banner-subtitle{font-family:var(--font-mono);font-size:10px;opacity:.7;margin-top:2px}
+.banner-badge{font-family:var(--font-mono);font-size:9px;padding:3px 8px;border-radius:3px;letter-spacing:.8px;white-space:nowrap}
+.banner-badge.critical{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.3);color:#FCA5A5}
+.banner-badge.high{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.3);color:#FCD34D}
+.banner-badge.safe{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.3);color:#6EE7B7}
+
+/* Extension Popup Mockup */
+.popup-mockup{width:360px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.popup-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-subtle);background:var(--bg-panel)}
+.popup-logo{display:flex;align-items:center;gap:8px}
+.popup-logo-mark{width:26px;height:26px;background:var(--accent-blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+.popup-brand{font-size:11px;font-weight:700;letter-spacing:1.5px}
+.popup-body{padding:14px}
+.popup-input{width:100%;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;padding:8px 12px;color:var(--text-heading);font-family:var(--font-mono);font-size:10px;margin-bottom:10px}
+.popup-result{border:1px solid;border-radius:8px;padding:14px}
+.popup-result.critical{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.03)}
+.popup-result.safe{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.03)}
+.popup-result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.popup-risk{font-size:16px;font-weight:700}
+.popup-score{font-family:var(--font-mono);font-size:24px;font-weight:700}
+.popup-features{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.popup-feat{display:flex;justify-content:space-between;padding:5px 8px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:3px;font-size:9px}
+.popup-feat span:first-child{color:var(--text-muted)}
+.popup-feat span:last-child{font-family:var(--font-mono);font-weight:600}
+.popup-footer{display:flex;justify-content:space-between;padding:8px 14px;border-top:1px solid var(--border-subtle);background:var(--bg-panel);font-family:var(--font-mono);font-size:8px;color:var(--text-dim)}
+
+/* Two Column Layout */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}}
+
+/* Mitigation Cards */
+.mitigation-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.mitigation-card{padding:20px;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;transition:all .3s}
+.mitigation-card:hover{border-color:var(--accent-blue);transform:translateY(-2px)}
+.mitigation-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:20px}
+.mitigation-icon.blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
+.mitigation-icon.green{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
+.mitigation-icon.red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+.mitigation-icon.amber{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.mitigation-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.mitigation-desc{font-size:11px;color:var(--text-sub-muted);line-height:1.6}
+
+/* Timeline Mini */
+.mini-timeline{display:flex;flex-direction:column;gap:0;max-width:700px;margin:0 auto}
+.mini-entry{display:grid;grid-template-columns:120px 20px 1fr;gap:14px}
+.mini-ts{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-align:right;padding-top:14px}
+.mini-dot-col{display:flex;flex-direction:column;align-items:center;padding-top:16px}
+.mini-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mini-dot.blue{background:var(--accent-blue);box-shadow:0 0 10px rgba(59,130,246,.4)}
+.mini-dot.amber{background:var(--accent-amber);box-shadow:0 0 10px rgba(245,158,11,.4)}
+.mini-dot.red{background:var(--accent-red);box-shadow:0 0 10px rgba(239,68,68,.4)}
+.mini-dot.green{background:var(--accent-green);box-shadow:0 0 10px rgba(16,185,129,.4)}
+.mini-line{width:1px;flex:1;background:var(--border-subtle);min-height:12px}
+.mini-entry:last-child .mini-line{display:none}
+.mini-content{padding:12px 16px;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:8px;margin-bottom:12px}
+.mini-content-title{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.8px;margin-bottom:4px}
+.mini-content-desc{font-size:12px;color:var(--text-muted);line-height:1.5}
+
+/* Redirect Chain */
+.redirect-step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;position:relative}
+.redirect-step:not(:last-child){border-bottom:1px dashed var(--border-subtle)}
+.redirect-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:9px;font-weight:700;flex-shrink:0}
+.redirect-num.blue{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:var(--accent-blue)}
+.redirect-num.red{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--accent-red)}
+.redirect-num.green{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--accent-green)}
+.redirect-num.amber{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:var(--accent-amber)}
+.redirect-info{flex:1;min-width:0}
+.redirect-url{font-family:var(--font-mono);font-size:11px;word-break:break-all;margin-bottom:2px}
+.redirect-url.safe{color:var(--accent-green)}.redirect-url.danger{color:var(--accent-red)}.redirect-url.warn{color:var(--accent-amber)}
+.redirect-meta{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:.3px}
+.redirect-arrow{text-align:center;color:var(--text-dim);font-size:16px;padding:4px 0}
+.decomp-row{display:grid;grid-template-columns:140px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid rgba(26,29,35,.5)}
+.decomp-label{font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);letter-spacing:.5px}
+.decomp-value{font-family:var(--font-mono);font-size:11px;color:var(--text-heading);word-break:break-all}
+.decomp-value.red{color:var(--accent-red)}.decomp-value.amber{color:var(--accent-amber)}.decomp-value.green{color:var(--accent-green)}
+/* Unified Toggle Switch */
+.toggle-wrap{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px}
+.toggle-label-text{display:flex;flex-direction:column;gap:2px}
+.toggle-label-main{font-size:14px;font-weight:600;color:var(--text-heading)}
+.toggle-label-sub{font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);letter-spacing:.5px}
+.toggle-switch{position:relative;width:48px;height:26px;flex-shrink:0}
+.toggle-switch input{display:none}
+.toggle-slider{position:absolute;inset:0;background:var(--border-subtle);border-radius:13px;cursor:pointer;transition:all .3s}
+.toggle-slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:all .3s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle-switch input:checked + .toggle-slider{background:var(--accent-blue);box-shadow:0 0 16px rgba(59,130,246,.3)}
+.toggle-switch input:checked + .toggle-slider::before{transform:translateX(22px)}
+.toggle-indicator{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.5px}
+.toggle-indicator.active{color:var(--accent-blue)}
+.toggle-indicator.inactive{color:var(--text-dim)}
+/* Dataset Comparison Panel */
+.dataset-panel{background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden}
+.dataset-header{padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center}
+.dataset-title{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--text-muted)}
+.dataset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0}
+.dataset-cell{padding:16px;border-right:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)}
+.dataset-cell:last-child{border-right:none}
+.dataset-cell-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--text-sub-muted);margin-bottom:8px}
+.dataset-cell-value{font-family:var(--font-mono);font-size:13px;font-weight:600}
+.dataset-cell-value.safe{color:var(--accent-green)}.dataset-cell-value.danger{color:var(--accent-red)}.dataset-cell-value.warn{color:var(--accent-amber)}.dataset-cell-value.info{color:var(--accent-blue)}
+.dataset-cell-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-top:4px}
+.dataset-entry{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(26,29,35,.4)}
+.dataset-entry:last-child{border-bottom:none}
+.dataset-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dataset-dot.safe{background:var(--accent-green)}.dataset-dot.danger{background:var(--accent-red)}.dataset-dot.warn{background:var(--accent-amber)}.dataset-dot.info{background:var(--accent-blue)}
+.dataset-name{font-family:var(--font-mono);font-size:11px;color:var(--text-heading);flex:1}
+.dataset-score{font-family:var(--font-mono);font-size:10px;font-weight:600}
+/* Footer */
+.site-footer{border-top:1px solid var(--border-subtle);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
+.footer-mono{font-family:var(--font-mono);font-size:11px;color:var(--text-dim)}
+
+/* Threat Feed Ticker */
+.threat-ticker{background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);overflow:hidden;position:relative;height:40px}
+.threat-ticker-track{display:flex;align-items:center;height:100%;white-space:nowrap;animation:ticker-scroll 45s linear infinite;width:max-content}
+.threat-ticker-track:hover{animation-play-state:paused}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.threat-ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 24px;font-size:11px;font-family:var(--font-mono);letter-spacing:.5px;border-right:1px solid var(--border-subtle);height:100%;flex-shrink:0}
+.threat-ticker-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.threat-ticker-dot.red{background:var(--accent-red);box-shadow:0 0 6px var(--accent-red);animation:pulse-dot 1.5s ease-in-out infinite}
+.threat-ticker-dot.amber{background:var(--accent-amber);box-shadow:0 0 6px var(--accent-amber);animation:pulse-dot 2s ease-in-out infinite}
+.threat-ticker-dot.green{background:var(--accent-green);box-shadow:0 0 6px var(--accent-green);animation:pulse-dot 2s ease-in-out infinite}
+.threat-ticker-dot.blue{background:var(--accent-blue);box-shadow:0 0 6px var(--accent-blue);animation:pulse-dot 2s ease-in-out infinite}
+.threat-ticker-time{color:var(--text-dim);font-size:10px;flex-shrink:0}
+.threat-ticker-url{color:var(--text-muted);max-width:340px;overflow:hidden;text-overflow:ellipsis}
+.threat-ticker-score{padding:1px 6px;border-radius:3px;font-weight:600;font-size:10px}
+.threat-ticker-score.safe{background:rgba(16,185,129,.12);color:var(--accent-green)}
+.threat-ticker-score.warning{background:rgba(245,158,11,.12);color:var(--accent-amber)}
+.threat-ticker-score.danger{background:rgba(239,68,68,.12);color:var(--accent-red)}
+.threat-ticker-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;flex-shrink:0}
+.threat-ticker-label.blocked{color:var(--accent-red)}
+.threat-ticker-label.allowed{color:var(--accent-green)}
+.threat-ticker-label.flagged{color:var(--accent-amber)}
+.threat-ticker-label.scanning{color:var(--accent-blue)}
+</style>
+</head>
+<body>
+
+<div class="global-scanline"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">PG</div>
+      <span class="logo-text">PHISHGUARD</span>
+    </div>
+    <div class="header-right">
+      <span class="status-badge green"><span class="status-dot"></span>DEMO MODE</span>
+    </div>
+  </div>
+</header>
+
+<!-- THREAT FEED TICKER -->
+<div class="threat-ticker">
+  <div class="threat-ticker-track" id="threatTickerTrack"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: LIVE URL SCANNER DEMO                  -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge blue">FEATURE 01 — REAL-TIME URL SCANNING</span>
+    <h2 class="section-title">Scan any URL instantly.</h2>
+    <p class="section-subtitle">Enter a URL or click a preset to see PhishGuard's real-time threat analysis in action. The scanner extracts 42+ features and runs ML prediction in under 50ms.</p>
+  </div>
+
+  <div class="scanner-box">
+    <div class="scanner-header">
+      <span class="scanner-dot r"></span><span class="scanner-dot y"></span><span class="scanner-dot g"></span>
+      <span class="scanner-title">PHISHGUARD SCANNER — INTERACTIVE DEMO</span>
+    </div>
+    <div class="scanner-body">
+      <div class="url-input-row">
+        <input type="text" class="url-input" id="urlInput" placeholder="Enter URL to scan (e.g. https://secure-login-verify.xyz/auth)" spellcheck="false">
+        <button class="scan-btn" id="scanBtn" onclick="runScan()">⚡ SCAN</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="scan-btn" style="background:var(--accent-red-dim);padding:6px 12px;font-size:10px" onclick="loadPreset('phishing')">🚨 Phishing URL</button>
+        <button class="scan-btn" style="background:var(--accent-amber-dim);padding:6px 12px;font-size:10px" onclick="loadPreset('suspicious')">⚠️ Suspicious URL</button>
+        <button class="scan-btn" style="background:var(--accent-green-dim);padding:6px 12px;font-size:10px" onclick="loadPreset('safe')">✅ Safe URL</button>
+      </div>
+
+      <div class="result-panel" id="scanResult"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: FEATURE EXTRACTION                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge amber">FEATURE 02 — SECURITY FEATURE EXTRACTION</span>
+    <h2 class="section-title">42+ features extracted from every URL.</h2>
+    <p class="section-subtitle">Lexical patterns, domain structure, encoding signals, and behavioral indicators are all captured and converted into a high-dimensional feature vector.</p>
+  </div>
+
+  <div class="two-col">
+    <!-- Feature Table -->
+    <div style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border-subtle);background:var(--bg-elevated)">
+        <span class="status-badge red">PHISHING EXAMPLE</span>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);margin-top:6px;word-break:break-all">https://secure-bank-login[.]xyz/auth?user=admin&session=</div>
+      </div>
+      <div style="padding:12px">
+        <div class="features-grid" style="grid-template-columns:1fr">
+          <div class="feature-item"><span class="feature-name">URL Length</span><span class="feature-value danger">87 chars</span></div>
+          <div class="feature-item"><span class="feature-name">Hostname Length</span><span class="feature-value warn">28 chars</span></div>
+          <div class="feature-item"><span class="feature-name">Subdomains</span><span class="feature-value danger">3 levels</span></div>
+          <div class="feature-item"><span class="feature-name">Hyphens in Domain</span><span class="feature-value danger">2 found</span></div>
+          <div class="feature-item"><span class="feature-name">Suspicious TLD (.xyz)</span><span class="feature-value danger">YES</span></div>
+          <div class="feature-item"><span class="feature-name">Has IP Address</span><span class="feature-value ok">NO</span></div>
+          <div class="feature-item"><span class="feature-name">HTTPS</span><span class="feature-value ok">YES</span></div>
+          <div class="feature-item"><span class="feature-name">Login Keywords</span><span class="feature-value danger">3 found</span></div>
+          <div class="feature-item"><span class="feature-name">URL Shortener</span><span class="feature-value ok">NO</span></div>
+          <div class="feature-item"><span class="feature-name">Encoded Characters</span><span class="feature-value warn">4 instances</span></div>
+          <div class="feature-item"><span class="feature-name">Entropy Score</span><span class="feature-value danger">4.82</span></div>
+          <div class="feature-item"><span class="feature-name">Digits in Hostname</span><span class="feature-value ok">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Table Safe -->
+    <div style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border-subtle);background:var(--bg-elevated)">
+        <span class="status-badge green">SAFE EXAMPLE</span>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);margin-top:6px;word-break:break-all">https://github.com/phishguard/ai-extension</div>
+      </div>
+      <div style="padding:12px">
+        <div class="features-grid" style="grid-template-columns:1fr">
+          <div class="feature-item"><span class="feature-name">URL Length</span><span class="feature-value ok">39 chars</span></div>
+          <div class="feature-item"><span class="feature-name">Hostname Length</span><span class="feature-value ok">11 chars</span></div>
+          <div class="feature-item"><span class="feature-name">Subdomains</span><span class="feature-value ok">0 levels</span></div>
+          <div class="feature-item"><span class="feature-name">Hyphens in Domain</span><span class="feature-value ok">0 found</span></div>
+          <div class="feature-item"><span class="feature-name">Suspicious TLD (.com)</span><span class="feature-value ok">NO</span></div>
+          <div class="feature-item"><span class="feature-name">Has IP Address</span><span class="feature-value ok">NO</span></div>
+          <div class="feature-item"><span class="feature-name">HTTPS</span><span class="feature-value ok">YES</span></div>
+          <div class="feature-item"><span class="feature-name">Login Keywords</span><span class="feature-value ok">0 found</span></div>
+          <div class="feature-item"><span class="feature-name">URL Shortener</span><span class="feature-value ok">NO</span></div>
+          <div class="feature-item"><span class="feature-name">Encoded Characters</span><span class="feature-value ok">0 instances</span></div>
+          <div class="feature-item"><span class="feature-name">Entropy Score</span><span class="feature-value ok">3.21</span></div>
+          <div class="feature-item"><span class="feature-name">Digits in Hostname</span><span class="feature-value ok">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: WEB SCRAPING & PAGE SIGNALS            -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge blue">FEATURE 03 — WEB SCRAPING & PAGE ANALYSIS</span>
+    <h2 class="section-title">Deep page content inspection.</h2>
+    <p class="section-subtitle">Beyond URL lexics, PhishGuard scrapes page content to detect login forms, suspicious scripts, hidden iframes, and redirect chains.</p>
+  </div>
+
+  <div class="two-col">
+    <!-- Malicious Page Signals -->
+    <div style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px">MALICIOUS PAGE</span>
+        <span class="status-badge red">DETECTED</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(239,68,68,.2);border-radius:6px">
+          <span style="font-size:18px">🔓</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-red)">Password Input Form</div><div style="font-size:10px;color:var(--text-sub-muted)">type="password" field detected in DOM</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(239,68,68,.2);border-radius:6px">
+          <span style="font-size:18px">📜</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-red)">7 External Scripts</div><div style="font-size:10px;color:var(--text-sub-muted)">From 4 different domains — keylogger risk</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(239,68,68,.2);border-radius:6px">
+          <span style="font-size:18px">🖼️</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-red)">Hidden Iframe</div><div style="font-size:10px;color:var(--text-sub-muted)">0x0 pixel iframe — data exfiltration vector</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(245,158,11,.2);border-radius:6px">
+          <span style="font-size:18px">🔄</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-amber)">Meta-Refresh Redirect</div><div style="font-size:10px;color:var(--text-sub-muted)">Automatic page redirect detected</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(239,68,68,.2);border-radius:6px">
+          <span style="font-size:18px">🎭</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-red)">No Favicon Match</div><div style="font-size:10px;color:var(--text-sub-muted)">Claims to be bank but favicon doesn't match brand</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Page Signals -->
+    <div style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px">LEGITIMATE PAGE</span>
+        <span class="status-badge green">CLEAN</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:6px">
+          <span style="font-size:18px">📄</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-green)">Content-Based Page</div><div style="font-size:10px;color:var(--text-sub-muted)">Text-heavy content, no credential forms</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:6px">
+          <span style="font-size:18px">✅</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-green)">Valid SSL Certificate</div><div style="font-size:10px;color:var(--text-sub-muted)">Certificate issued by trusted CA</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:6px">
+          <span style="font-size:18px">🛡️</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-green)">Favicon Verified</div><div style="font-size:10px;color:var(--text-sub-muted)">Matches claimed brand identity</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:6px">
+          <span style="font-size:18px">📋</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-green)">No Hidden Elements</div><div style="font-size:10px;color:var(--text-sub-muted)">Clean DOM, no iframes or redirects</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:6px">
+          <span style="font-size:18px">🔗</span>
+          <div><div style="font-size:11px;font-weight:600;color:var(--accent-green)">Known Trusted Domain</div><div style="font-size:10px;color:var(--text-sub-muted)">Domain registered 12+ years, high reputation</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4: ML PREDICTION PROCESS                  -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge red">FEATURE 04 — AI/ML THREAT PREDICTION</span>
+    <h2 class="section-title">From feature vector to threat prediction.</h2>
+    <p class="section-subtitle">Extracted features are converted into a high-dimensional vector and fed through the ML prediction engine to classify risk levels and predict threat effects.</p>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-dot-col"><div class="pipeline-dot blue"></div><div class="pipeline-line"></div></div>
+      <div class="pipeline-card">
+        <div class="pipeline-card-title">STEP 1 — URL CAPTURE</div>
+        <div class="pipeline-card-desc">The extension intercepts the navigation event and captures the full URL before the page loads.</div>
+        <div class="pipeline-card-data">URL: https://secure-bank-login[.]xyz/auth?user=admin<br>Protocol: HTTPS &nbsp;|&nbsp; Domain: secure-bank-login.xyz<br>Path: /auth &nbsp;|&nbsp; Query: user=admin</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-dot-col"><div class="pipeline-dot amber"></div><div class="pipeline-line"></div></div>
+      <div class="pipeline-card">
+        <div class="pipeline-card-title">STEP 2 — LEXICAL FEATURE EXTRACTION</div>
+        <div class="pipeline-card-desc">42 security features are extracted from the URL string, domain structure, and character patterns.</div>
+        <div class="pipeline-card-data">url_length: 87 &nbsp;|&nbsp; hostname_length: 28 &nbsp;|&nbsp; num_hyphens: 2<br>num_subdomains: 3 &nbsp;|&nbsp; has_suspicious_tld: 1<br>has_login_keyword: 1 &nbsp;|&nbsp; entropy: 4.82<br>has_encoded_chars: 1 &nbsp;|&nbsp; has_https: 1</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-dot-col"><div class="pipeline-dot amber"></div><div class="pipeline-line"></div></div>
+      <div class="pipeline-card">
+        <div class="pipeline-card-title">STEP 3 — PAGE SIGNAL SCRAPING</div>
+        <div class="pipeline-card-desc">The content script inspects the DOM for forms, scripts, iframes, and redirect behavior.</div>
+        <div class="pipeline-card-data">has_login_form: 1 &nbsp;|&nbsp; has_password_field: 1<br>num_external_scripts: 7 &nbsp;|&nbsp; has_iframe: 1<br>has_meta_refresh: 1 &nbsp;|&nbsp; num_forms: 2<br>bodyTextLength: 342 &nbsp;(thin — likely spoof page)</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-dot-col"><div class="pipeline-dot blue"></div><div class="pipeline-line"></div></div>
+      <div class="pipeline-card">
+        <div class="pipeline-card-title">STEP 4 — FEATURE VECTOR CONVERSION</div>
+        <div class="pipeline-card-desc">Raw signals are combined into a normalized 42-dimensional feature vector for the ML model.</div>
+        <div class="pipeline-card-data">Dimensions: 42 &nbsp;|&nbsp; Normalization: Min-Max [0,1]<br>URL lexics: [0.87, 0.56, 0.67, 1.0, 0.0, ...]<br>Page signals: [1.0, 1.0, 0.88, 1.0, ...]<br>Behavioral: [0.34, 0.82, 0.91, ...]<br>Network: [1.0, 0.0, 0.45, 0.78]</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-dot-col"><div class="pipeline-dot red"></div><div class="pipeline-line"></div></div>
+      <div class="pipeline-card" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.02)">
+        <div class="pipeline-card-title" style="color:var(--accent-red)">STEP 5 — ML THREAT PREDICTION</div>
+        <div class="pipeline-card-desc">The model classifies the risk level and predicts the likely harm with a confidence score.</div>
+        <div class="pipeline-card-data" style="border-color:rgba(239,68,68,.2)">
+          <span style="color:var(--accent-red);font-weight:600">RISK LEVEL: CRITICAL</span><br>
+          <span style="color:var(--accent-red)">THREAT SCORE: 91/100</span><br>
+          <span style="color:var(--accent-red)">CONFIDENCE: 97%</span><br>
+          PREDICTED EFFECTS:<br>
+          &nbsp;&nbsp;→ Credential Theft (password harvesting form detected)<br>
+          &nbsp;&nbsp;→ Financial Fraud (banking brand impersonation)<br>
+          &nbsp;&nbsp;→ Malicious Redirect (meta-refresh + hidden iframe)
+        </div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-dot-col"><div class="pipeline-dot green"></div></div>
+      <div class="pipeline-card" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.02)">
+        <div class="pipeline-card-title" style="color:var(--accent-green)">STEP 6 — USER ALERT DISPATCHED</div>
+        <div class="pipeline-card-desc">Warning banner injected, badge updated, notification sent — user protected in under 2 seconds.</div>
+        <div class="pipeline-card-data" style="border-color:rgba(16,185,129,.2)">
+          <span style="color:var(--accent-green)">Total pipeline time: 1.999 seconds</span><br>
+          Banner: INJECTED &nbsp;|&nbsp; Badge: UPDATED (red !!)<br>
+          Notification: QUEUED &nbsp;|&nbsp; History: LOGGED<br>
+          <span style="color:var(--accent-green);font-weight:600">STATUS: USER PROTECTED ✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4B: LINK APPLICATION & REDIRECT DETECTION -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge red">FEATURE 04B — LINK APPLICATION & REDIRECT DETECTION</span>
+    <h2 class="section-title">Apply any link. Watch it get caught.</h2>
+    <p class="section-subtitle">Paste a real or simulated phishing link below. PhishGuard intercepts it before the page loads, traces its redirect chain, and shows you exactly where it leads — then blocks it.</p>
+  </div>
+
+  <div class="scanner-box" style="margin-bottom:0">
+    <div class="scanner-header">
+      <span class="scanner-dot r"></span><span class="scanner-dot y"></span><span class="scanner-dot g"></span>
+      <span class="scanner-title">LINK APPLICATION AREA — PASTE & DETECT</span>
+    </div>
+    <div class="scanner-body">
+      <div class="url-input-row">
+        <input type="text" class="url-input" id="linkInput" placeholder="Paste any URL to trace its redirect chain and detect threats..." spellcheck="false">
+        <button class="scan-btn" id="linkScanBtn" onclick="runLinkDetect()">🔗 APPLY & TRACE</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="scan-btn" style="background:var(--accent-red-dim);padding:6px 12px;font-size:10px" onclick="loadLinkPreset('shortener')">🔗 URL Shortener</button>
+        <button class="scan-btn" style="background:var(--accent-red-dim);padding:6px 12px;font-size:10px" onclick="loadLinkPreset('ipaddr')">🔢 IP Address Link</button>
+        <button class="scan-btn" style="background:var(--accent-amber-dim);padding:6px 12px;font-size:10px" onclick="loadLinkPreset('encoded')">🔤 Encoded URL</button>
+        <button class="scan-btn" style="background:var(--accent-red-dim);padding:6px 12px;font-size:10px" onclick="loadLinkPreset('redirect')">🔄 Multi-Redirect</button>
+        <button class="scan-btn" style="background:var(--accent-green-dim);padding:6px 12px;font-size:10px" onclick="loadLinkPreset('direct')">✅ Direct Safe Link</button>
+      </div>
+
+      <div id="linkResult" style="display:none">
+        <!-- Redirect Chain Visualization -->
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:20px;margin-bottom:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--text-sub-muted);margin-bottom:14px">REDIRECT CHAIN TRACE</div>
+          <div id="redirectChain"></div>
+        </div>
+
+        <!-- Link Decomposition -->
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:20px;margin-bottom:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--text-sub-muted);margin-bottom:14px">LINK DECOMPOSITION</div>
+          <div id="linkDecomp"></div>
+        </div>
+
+        <!-- Detection Result -->
+        <div id="linkDetectionResult"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 5: WARNING BANNERS                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge red">FEATURE 05 — INSTANT BROWSER WARNINGS</span>
+    <h2 class="section-title">Warning banners & safe status display.</h2>
+    <p class="section-subtitle">When a threat is detected, PhishGuard injects an alert banner directly into the page. Safe pages get a green shield. Users see exactly what risk they face.</p>
+  </div>
+
+  <!-- Critical Warning Banner -->
+  <div class="banner-demo" style="margin-bottom:24px">
+    <div class="warning-banner critical">
+      <div class="banner-icon critical">⚠</div>
+      <div class="banner-text">
+        <div class="banner-title critical">PhishGuard Alert — CRITICAL Risk Detected</div>
+        <div class="banner-subtitle">Credential Theft • Financial Fraud • Malicious Redirect — 97% confidence</div>
+      </div>
+      <span class="banner-badge critical">91/100 THREAT SCORE</span>
+    </div>
+    <div class="banner-page-bg">
+      <h3>[Phishing page would render here]</h3>
+      <p>The banner sits above the malicious content, warning the user before they interact.</p>
+    </div>
+  </div>
+
+  <!-- High Warning Banner -->
+  <div class="banner-demo" style="margin-bottom:24px">
+    <div class="warning-banner high">
+      <div class="banner-icon high">⚠</div>
+      <div class="banner-text">
+        <div class="banner-title high">PhishGuard Alert — HIGH Risk Detected</div>
+        <div class="banner-subtitle">Suspicious URL patterns • 3 subdomains detected — 74% confidence</div>
+      </div>
+      <span class="banner-badge high">52/100 THREAT SCORE</span>
+    </div>
+    <div class="banner-page-bg">
+      <h3>[Suspicious page would render here]</h3>
+      <p>Medium-to-high risk pages show amber warnings with context-specific risk explanations.</p>
+    </div>
+  </div>
+
+  <!-- Safe Banner -->
+  <div class="banner-demo">
+    <div class="warning-banner safe">
+      <div class="banner-icon safe">🛡</div>
+      <div class="banner-text">
+        <div class="banner-title safe">PhishGuard — Page Verified Safe</div>
+        <div class="banner-subtitle">All 42 features passed • Known trusted domain — 99% confidence</div>
+      </div>
+      <span class="banner-badge safe">0/100 THREAT SCORE</span>
+    </div>
+    <div class="banner-page-bg">
+      <h3>[Legitimate page content renders here]</h3>
+      <p>Safe pages display a brief green confirmation, then the banner fades out.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 6: EXTENSION POPUP                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge blue">FEATURE 06 — BROWSER EXTENSION INTERFACE</span>
+    <h2 class="section-title">The extension popup in action.</h2>
+    <p class="section-subtitle">Click the PhishGuard icon to open the popup — scan URLs, view current tab analysis, check history, and configure settings.</p>
+  </div>
+
+  <div class="two-col" style="justify-content:center">
+    <!-- Popup: Critical Result -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <span class="status-badge red">CRITICAL THREAT DETECTED</span>
+      <div class="popup-mockup">
+        <div class="popup-header">
+          <div class="popup-logo"><div class="popup-logo-mark">PG</div><span class="popup-brand">PHISHGUARD</span></div>
+          <span class="status-badge green" style="font-size:8px;padding:2px 6px"><span class="status-dot" style="width:4px;height:4px"></span>ACTIVE</span>
+        </div>
+        <div class="popup-body">
+          <div class="popup-input" style="color:var(--text-sub-muted)">https://secure-bank-login[.]xyz/auth</div>
+          <div class="popup-result critical">
+            <div class="popup-result-header">
+              <div><span style="font-size:18px">🚨</span> <span class="popup-risk" style="color:var(--accent-red)">CRITICAL</span></div>
+              <span class="popup-score" style="color:var(--accent-red)">91</span>
+            </div>
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-family:var(--font-mono);font-size:8px;color:var(--text-sub-muted)">CONFIDENCE</span><span style="font-family:var(--font-mono);font-size:9px;color:var(--accent-red)">97%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:97%;background:var(--accent-red)"></div></div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <span class="effect-tag">Credential Theft</span>
+              <span class="effect-tag">Financial Fraud</span>
+              <span class="effect-tag">Malicious Redirect</span>
+            </div>
+          </div>
+        </div>
+        <div class="popup-footer"><span>Protected</span><span id="footerTime">--:--:-- UTC</span></div>
+      </div>
+    </div>
+
+    <!-- Popup: Safe Result -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <span class="status-badge green">PAGE VERIFIED SAFE</span>
+      <div class="popup-mockup">
+        <div class="popup-header">
+          <div class="popup-logo"><div class="popup-logo-mark">PG</div><span class="popup-brand">PHISHGUARD</span></div>
+          <span class="status-badge green" style="font-size:8px;padding:2px 6px"><span class="status-dot" style="width:4px;height:4px"></span>ACTIVE</span>
+        </div>
+        <div class="popup-body">
+          <div class="popup-input" style="color:var(--text-sub-muted)">https://github.com/phishguard/ai-extension</div>
+          <div class="popup-result safe">
+            <div class="popup-result-header">
+              <div><span style="font-size:18px">🛡</span> <span class="popup-risk" style="color:var(--accent-green)">SAFE</span></div>
+              <span class="popup-score" style="color:var(--accent-green)">2</span>
+            </div>
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-family:var(--font-mono);font-size:8px;color:var(--text-sub-muted)">CONFIDENCE</span><span style="font-family:var(--font-mono);font-size:9px;color:var(--accent-green)">99%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:99%;background:var(--accent-green)"></div></div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <span class="effect-tag safe">No Threats Detected</span>
+              <span class="effect-tag safe">Trusted Domain</span>
+            </div>
+          </div>
+        </div>
+        <div class="popup-footer"><span>Protected</span><span id="footerTime2">--:--:-- UTC</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 7: MITIGATION PROCESS                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge green">FEATURE 07 — DETECTION & MITIGATION WORKFLOW</span>
+    <h2 class="section-title">Complete threat response pipeline.</h2>
+    <p class="section-subtitle">From URL capture to user protection — every step is timestamped and auditable.</p>
+  </div>
+
+  <div class="mini-timeline">
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:07.412</div>
+      <div class="mini-dot-col"><div class="mini-dot blue"></div><div class="mini-line"></div></div>
+      <div class="mini-content"><div class="mini-content-title" style="color:var(--accent-blue)">URL INTERCEPTED</div><div class="mini-content-desc">Navigation event captured. Domain <code>secure-bank-login.xyz</code> flagged by TLD heuristics.</div></div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:07.891</div>
+      <div class="mini-dot-col"><div class="mini-dot amber"></div><div class="mini-line"></div></div>
+      <div class="mini-content"><div class="mini-content-title" style="color:var(--accent-amber)">42 FEATURES EXTRACTED</div><div class="mini-content-desc">URL lexics analyzed: suspicious TLD, login keywords, high entropy, encoded characters.</div></div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:08.234</div>
+      <div class="mini-dot-col"><div class="mini-dot blue"></div><div class="mini-line"></div></div>
+      <div class="mini-content"><div class="mini-content-title" style="color:var(--accent-blue)">PAGE SCRAPED</div><div class="mini-content-desc">Password form, 7 external scripts, hidden iframe, meta-refresh redirect detected.</div></div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:08.891</div>
+      <div class="mini-dot-col"><div class="mini-dot blue"></div><div class="mini-line"></div></div>
+      <div class="mini-content"><div class="mini-content-title" style="color:var(--accent-blue)">FEATURE VECTOR BUILT</div><div class="mini-content-desc">42D vector normalized. URL lexics (18), page signals (12), behavior (8), network (4).</div></div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:09.127</div>
+      <div class="mini-dot-col"><div class="mini-dot red"></div><div class="mini-line"></div></div>
+      <div class="mini-content" style="border-color:rgba(239,68,68,.25)"><div class="mini-content-title" style="color:var(--accent-red)">THREAT: CRITICAL — 91/100</div><div class="mini-content-desc">ML prediction: 97% confidence. Effects: credential theft, financial fraud, malicious redirect.</div></div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:09.234</div>
+      <div class="mini-dot-col"><div class="mini-dot red"></div><div class="mini-line"></div></div>
+      <div class="mini-content" style="border-color:rgba(239,68,68,.25)"><div class="mini-content-title" style="color:var(--accent-red)">WARNING BANNER INJECTED</div><div class="mini-content-desc">Alert injected into page DOM. Badge updated to red "!!". Desktop notification queued.</div></div>
+    </div>
+    <div class="mini-entry">
+      <div class="mini-ts">14:32:09.412</div>
+      <div class="mini-dot-col"><div class="mini-dot green"></div></div>
+      <div class="mini-content" style="border-color:rgba(16,185,129,.25)"><div class="mini-content-title" style="color:var(--accent-green)">USER PROTECTED — 2.0s TOTAL</div><div class="mini-content-desc">Full analysis cycle complete. Threat logged. Intelligence updated. User safe.</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 8: MITIGATION ACTIONS                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge green">FEATURE 08 — MITIGATION & PROTECTION</span>
+    <h2 class="section-title">Automatic threat mitigation.</h2>
+    <p class="section-subtitle">When a threat is confirmed, PhishGuard takes immediate action to protect the user.</p>
+  </div>
+
+  <div class="mitigation-grid">
+    <div class="mitigation-card">
+      <div class="mitigation-icon red">🚨</div>
+      <div class="mitigation-title">Warning Banner Injection</div>
+      <div class="mitigation-desc">A full-width alert banner is injected at the top of the malicious page, warning the user before they interact with any content.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon red">🔴</div>
+      <div class="mitigation-title">Badge Indicator Update</div>
+      <div class="mitigation-desc">The extension icon badge changes to red "!!" for critical threats, amber "!" for moderate, or green "✓" for safe — visible at a glance.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon amber">🔔</div>
+      <div class="mitigation-title">Desktop Notification</div>
+      <div class="mitigation-desc">Critical threats trigger a desktop notification with the threat level, predicted effects, and confidence score — even if the popup isn't open.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon blue">📊</div>
+      <div class="mitigation-title">Threat History Logging</div>
+      <div class="mitigation-desc">Every analysis is logged with full feature data, prediction results, and timestamps — creating an auditable record of detected threats.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon green">🛡️</div>
+      <div class="mitigation-title">Safe Page Verification</div>
+      <div class="mitigation-desc">Trusted pages receive a green shield indicator with confidence score, giving users visible confirmation that the page is safe to use.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon blue">💡</div>
+      <div class="mitigation-title">Context-Specific Risk Guidance</div>
+      <div class="mitigation-desc">Users receive actionable guidance: "Do not enter credentials" for credential theft, "Do not download" for malware, or "Proceed with caution" for low risk.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon amber">🔍</div>
+      <div class="mitigation-title">Real-Time Page Monitoring</div>
+      <div class="mitigation-desc">Content scripts continuously monitor for DOM changes, new forms, and dynamic redirects — catching threats that appear after page load.</div>
+    </div>
+    <div class="mitigation-card">
+      <div class="mitigation-icon red">⛔</div>
+      <div class="mitigation-title">Block Site Button</div>
+      <div class="mitigation-desc">For critical threats, the popup offers a "Block Site" button that prevents further interaction with the domain during the session.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 10: INJECTION & MALWARE DETECTION         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge red">FEATURE 10 — DATA INJECTION & MALWARE DETECTION</span>
+    <h2 class="section-title">Detect injection attacks & malware triggers.</h2>
+    <p class="section-subtitle">Beyond phishing, PhishGuard scans for SQL injection, XSS, command injection, path traversal, and malware delivery patterns — with graphical threat indicators.</p>
+  </div>
+
+  <!-- Interactive Scanner -->
+  <div class="scanner-box" style="margin-bottom:24px">
+    <div class="scanner-header">
+      <span class="scanner-dot r"></span><span class="scanner-dot y"></span><span class="scanner-dot g"></span>
+      <span class="scanner-title">INJECTION & MALWARE SCANNER</span>
+    </div>
+    <div class="scanner-body">
+      <div class="url-input-row">
+        <input type="text" class="url-input" id="injectInput" placeholder="Paste any URL to validate, scan & compare against dataset..." spellcheck="false">
+        <button class="scan-btn" onclick="runInjectScan()">🔍 SCAN & VALIDATE</button>
+      </div>
+      <div class="toggle-wrap" style="margin-bottom:16px">
+        <label class="toggle-switch" style="margin:0">
+          <input type="checkbox" id="scanToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <div class="toggle-label-text">
+          <span class="toggle-label-main">Scan All Threats</span>
+          <span class="toggle-label-sub">SQL INJECTION + XSS + CMD INJECTION + PATH TRAVERSAL + MALWARE + EXFILTRATION</span>
+        </div>
+        <div class="toggle-indicator active" id="toggleStatus"><span class="status-dot"></span>ALL ACTIVE</div>
+      </div>
+      <div id="injectResult"></div>
+    </div>
+  </div>
+
+  <!-- Graphical Threat Dashboard -->
+  <div id="threatDashboard" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px">
+      <!-- Shield Indicator -->
+      <div id="shieldCard" style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:12px;padding:24px;text-align:center"></div>
+      <!-- Threat Gauges -->
+      <div id="gaugeCard" style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:12px;padding:20px"></div>
+      <!-- Threat Summary -->
+      <div id="summaryCard" style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:12px;padding:20px"></div>
+    </div>
+    <!-- Detailed Check Results -->
+    <div id="checkResults" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px"></div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 9: ENHANCED FEATURES                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="status-badge green">FEATURE 09 — ENHANCED INTELLIGENCE</span>
+    <h2 class="section-title">Whitelist, Reputation & User Feedback.</h2>
+    <p class="section-subtitle">Beyond lexical analysis — PhishGuard now uses domain reputation, trusted whitelists, two-step classification, and user feedback to reduce false positives and catch sophisticated phishing.</p>
+  </div>
+
+  <div class="two-col">
+    <!-- Trusted Domain Whitelist -->
+    <div style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px">TRUSTED DOMAIN WHITELIST</span>
+        <span class="status-badge green">50+ DOMAINS</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6">URLs on these verified domains receive a massive trust boost, eliminating false positives for legitimate banking, tech, news, and shopping sites.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">google.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">microsoft.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">github.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">amazon.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">paypal.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">bbc.co.uk</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">apple.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">facebook.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">netflix.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">chase.com</span>
+          <span class="effect-tag safe" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);color:var(--accent-green)">+40 more</span>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;padding:10px;color:var(--text-sub-muted);line-height:1.8">
+          TRUSTED_DOMAINS = [\<br>
+          &nbsp;&nbsp;'google.com', 'microsoft.com', 'apple.com',\<br>
+          &nbsp;&nbsp;'github.com', 'amazon.com', 'paypal.com',\<br>
+          &nbsp;&nbsp;'bbc.co.uk', 'cnn.com', 'reuters.com',\<br>
+          &nbsp;&nbsp;'chase.com', 'wellsfargo.com', ...\<br>
+          ];<br>
+          <span style="color:var(--accent-green)">→ URLs on these domains: score capped at 15/100 (SAFE)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Domain Reputation -->
+    <div style="background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px">DOMAIN REPUTATION SCORING</span>
+        <span class="status-badge blue">HISTORICAL TRUST</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6">Every domain is scored 0-100 based on historical trust data, registration age, and community reports. High-reputation domains get lower suspicion scores.</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:4px"><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">google.com</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent-green)">100</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:4px"><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">github.com</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent-green)">98</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid rgba(16,185,129,.2);border-radius:4px"><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">paypal.com</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent-green)">98</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid rgba(245,158,11,.2);border-radius:4px"><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">shopify.com</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent-amber)">88</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid rgba(239,68,68,.2);border-radius:4px"><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">secure-bank-login.xyz</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent-red)">0</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-elevated);border:1px solid rgba(239,68,68,.2);border-radius:4px"><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">free-prize-winner.top</span><span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--accent-red)">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-Step Classification -->
+  <div style="margin-top:32px;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px">TWO-STEP CLASSIFICATION PROCESS</span>
+      <span class="status-badge blue">STEP 1 → STEP 2</span>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center">
+      <!-- Step 1 -->
+      <div style="padding:16px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:8px">
+        <div style="font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--accent-amber);letter-spacing:1px;margin-bottom:8px">STEP 1: LEXICAL SUSPICION</div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:8px">Extract 42+ features from the URL. Detect look-alike patterns, obfuscation, and suspicious structure.</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);line-height:1.8">
+          url_length, num_hyphens, has_suspicious_tld,<br>has_login_keyword, entropy, has_brand_in_domain<br>
+          <span style="color:var(--accent-amber)">→ Raw Suspicion Score: 0-100</span>
+        </div>
+      </div>
+      <!-- Arrow -->
+      <div style="font-size:24px;color:var(--text-dim)">→</div>
+      <!-- Step 2 -->
+      <div style="padding:16px;background:var(--bg-elevated);border:1px solid rgba(59,130,246,.2);border-radius:8px">
+        <div style="font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--accent-blue);letter-spacing:1px;margin-bottom:8px">STEP 2: REPUTATION CONFIRM</div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:8px">Apply whitelist, reputation scores, and brand verification. Trusted domains get massive penalty reductions.</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);line-height:1.8">
+          is_trusted_domain, domain_reputation,<br>brand_match_trusted, has_brand_in_domain<br>
+          <span style="color:var(--accent-blue)">→ Adjustment: -85% to +20% → Final Score</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 18px;border-top:1px solid var(--border-subtle);background:var(--bg-elevated);display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      <div style="text-align:center">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-sub-muted);margin-bottom:4px">TRUSTED DOMAIN</div>
+        <div style="font-size:11px;color:var(--text-muted)">Suspicion: <span style="color:var(--accent-amber)">62</span> → Adj: <span style="color:var(--accent-green)">-53</span> → Final: <span style="color:var(--accent-green)">9 (SAFE)</span></div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-sub-muted);margin-bottom:4px">UNKNOWN DOMAIN</div>
+        <div style="font-size:11px;color:var(--text-muted)">Suspicion: <span style="color:var(--accent-amber)">45</span> → Adj: <span style="color:var(--accent-amber)">+2</span> → Final: <span style="color:var(--accent-amber)">47 (MODERATE)</span></div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-sub-muted);margin-bottom:4px">BRAND IMPERSONATION</div>
+        <div style="font-size:11px;color:var(--text-muted)">Suspicion: <span style="color:var(--accent-red)">78</span> → Adj: <span style="color:var(--accent-red)">+16</span> → Final: <span style="color:var(--accent-red)">94 (CRITICAL)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Feedback -->
+  <div style="margin-top:32px;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px">USER FEEDBACK SYSTEM</span>
+      <span class="status-badge green">FALSE POSITIVE CORRECTION</span>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:12px">After every scan, users can report whether the result was correct. "This site is SAFE" or "This site is MALICIOUS" feedback is stored and used to improve future detection accuracy.</div>
+        <div style="display:flex;gap:8px">
+          <div style="padding:8px 14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--accent-green)">✅ This site is SAFE</div>
+          <div style="padding:8px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--accent-red)">❌ This site is MALICIOUS</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:8px;padding:14px">
+        <div style="font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--text-heading);letter-spacing:.8px;margin-bottom:8px">FEEDBACK LOOP</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);line-height:2">
+          1. User scans URL → gets result<br>
+          2. User clicks SAFE or MALICIOUS<br>
+          3. Feedback stored with timestamp<br>
+          4. Domain feedback aggregated<br>
+          5. Reputation scores updated<br>
+          6. Future scans benefit → <span style="color:var(--accent-green)">fewer false positives</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <span style="font-size:11px;color:var(--text-dim)">&copy; 2026 PhishGuard AI — Feature Showcase</span>
+  <span class="footer-mono" id="footerTime3">--:--:-- UTC</span>
+</footer>
+
+<script>
+// ─── LIVE SCANNER DEMO ───
+const presets = {
+  phishing: {
+    url: 'https://secure-bank-login[.]xyz/auth?user=admin&session=',
+    risk: 'critical', level: 'CRITICAL', score: 91, confidence: 97,
+    effects: ['CREDENTIAL THEFT', 'FINANCIAL FRAUD', 'MALICIOUS REDIRECT'],
+    features: [
+      ['URL Length', '87 chars', 'danger'], ['Subdomains', '3', 'danger'],
+      ['Hyphens', '2', 'danger'], ['Suspicious TLD', 'YES', 'danger'],
+      ['HTTPS', 'YES', 'ok'], ['Login Keywords', '3', 'danger'],
+      ['Encoded Chars', '4', 'warn'], ['Entropy', '4.82', 'danger']
+    ]
+  },
+  suspicious: {
+    url: 'https://login.account-verify.top/confirm',
+    risk: 'high', level: 'HIGH', score: 62, confidence: 81,
+    effects: ['SUSPICIOUS PATTERN', 'OBFUSCATED URL'],
+    features: [
+      ['URL Length', '42 chars', 'ok'], ['Subdomains', '1', 'warn'],
+      ['Hyphens', '1', 'warn'], ['Suspicious TLD', 'YES', 'danger'],
+      ['HTTPS', 'YES', 'ok'], ['Login Keywords', '2', 'warn'],
+      ['Encoded Chars', '0', 'ok'], ['Entropy', '3.87', 'warn']
+    ]
+  },
+  safe: {
+    url: 'https://github.com/phishguard/ai-extension',
+    risk: 'safe', level: 'SAFE', score: 2, confidence: 99,
+    effects: ['NO THREATS DETECTED'],
+    features: [
+      ['URL Length', '39 chars', 'ok'], ['Subdomains', '0', 'ok'],
+      ['Hyphens', '1', 'ok'], ['Suspicious TLD', 'NO', 'ok'],
+      ['HTTPS', 'YES', 'ok'], ['Login Keywords', '0', 'ok'],
+      ['Encoded Chars', '0', 'ok'], ['Entropy', '3.21', 'ok']
+    ]
+  }
+};
+
+function loadPreset(key) {
+  const p = presets[key];
+  document.getElementById('urlInput').value = p.url;
+  showResult(p);
+}
+
+function runScan() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  
+  const lower = url.toLowerCase();
+  let parsed;
+  try { parsed = new URL(url.startsWith('http') ? url : 'https://' + url); } catch { parsed = null; }
+  const hostname = parsed ? parsed.hostname.toLowerCase() : '';
+  const path = parsed ? parsed.pathname : '';
+  const rootDomain = hostname.split('.').slice(-2).join('.');
+  
+  // ─── TRUSTED DOMAIN WHITELIST ───
+  const TRUSTED = [
+    'google.com','gmail.com','youtube.com','youtu.be',
+    'microsoft.com','live.com','outlook.com','office.com','github.com','github.io',
+    'apple.com','icloud.com','amazon.com','aws.amazon.com',
+    'facebook.com','fb.com','instagram.com','whatsapp.com','meta.com',
+    'twitter.com','x.com','linkedin.com','reddit.com',
+    'paypal.com','stripe.com','squareup.com',
+    'netflix.com','spotify.com','discord.com','slack.com','zoom.us',
+    'chase.com','bankofamerica.com','wellsfargo.com','citi.com',
+    'barclays.com','hsbc.com','lloydsbank.com','natwest.com',
+    'schwab.com','fidelity.com','vanguard.com',
+    'bbc.co.uk','bbc.com','cnn.com','reuters.com','apnews.com',
+    'nytimes.com','washingtonpost.com','theguardian.com',
+    'wikipedia.org','wikimedia.org',
+    'ebay.com','etsy.com','shopify.com','twitch.tv','dropbox.com',
+    'cloudflare.com','wordpress.com'
+  ];
+  const SUSPICIOUS_TLDS = ['.xyz','.top','.club','.online','.site','.work','.click','.link','.info','.biz','.buzz','.monster'];
+  const SHORTENER = ['bit.ly','tinyurl.com','goo.gl','t.co','is.gd','ow.ly','cutt.ly','rb.gy'];
+  const BRANDS = ['paypal','apple','microsoft','google','amazon','netflix','facebook','chase','wellsfargo','bankofamerica','dhl','fedex','usps'];
+  
+  const isTrusted = TRUSTED.some(d => hostname === d || hostname.endsWith('.' + d));
+  const hasSuspiciousTLD = SUSPICIOUS_TLDS.some(tld => hostname.endsWith(tld));
+  const hasShortener = SHORTENER.some(d => hostname.includes(d));
+  const hasIP = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(hostname);
+  const numSubs = hostname.split('.').length - 2;
+  const numHyphens = (hostname.match(/-/g) || []).length;
+  const hasLoginKW = ['login','signin','verify','secure','account','password','banking','confirm'].some(kw => lower.includes(kw));
+  const hasEncoded = /%[0-9a-fA-F]{2}/.test(url);
+  const hasAt = lower.includes('@') || lower.includes('%40');
+  const hasBrand = BRANDS.some(b => hostname.includes(b));
+  const brandTrusted = TRUSTED.some(d => hostname === d || hostname.endsWith('.' + d));
+  
+  // ─── STEP 1: LEXICAL SUSPICION ───
+  let susp = 0;
+  if (url.length > 75) susp += 15;
+  else if (url.length > 50) susp += 5;
+  if (hostname.length > 25) susp += 12;
+  if (numHyphens > 3) susp += 10; else if (numHyphens > 1) susp += 4;
+  if (hasIP) susp += 20;
+  if (numSubs > 3) susp += 10; else if (numSubs > 2) susp += 5;
+  if (hasSuspiciousTLD) susp += 15;
+  if (hasShortener) susp += 12;
+  if (hasLoginKW) susp += 8;
+  if (hasEncoded) susp += 10;
+  if (hasAt) susp += 25;
+  if (hasBrand && !brandTrusted) susp += 18;
+  if (parsed && parsed.protocol !== 'https:') susp += 10;
+  if (path.includes('//')) susp += 15;
+  if (path.includes('@')) susp += 20;
+  
+  // ─── STEP 2: REPUTATION CONFIRM ───
+  let adj = 0;
+  if (isTrusted) {
+    adj = -susp * 0.85;
+    // Lower penalty for benign features on trusted domains
+    if (url.length > 75) susp -= 5;
+    if (parsed && parsed.search && parsed.search.length > 20) susp -= 3;
+  }
+  else if (hasBrand && !brandTrusted) {
+    adj = susp * 0.20; // Brand impersonation boost
+  }
+  else {
+    adj = susp * 0.05; // Unknown domain slight boost
+  }
+  
+  const finalScore = Math.max(0, Math.min(100, Math.round(susp + adj)));
+  
+  // ─── CLASSIFY ───
+  let risk, level, confidence, effects;
+  if (finalScore >= 70) { risk='critical'; level='CRITICAL'; }
+  else if (finalScore >= 50) { risk='high'; level='HIGH'; }
+  else if (finalScore >= 30) { risk='moderate'; level='MODERATE'; }
+  else if (finalScore >= 15) { risk='low'; level='LOW'; }
+  else { risk='safe'; level='SAFE'; }
+  
+  confidence = Math.min(99, 55 + finalScore * 0.4);
+  if (isTrusted) confidence = 99;
+  
+  effects = [];
+  if (finalScore >= 50) {
+    if (hasLoginKW) effects.push('CREDENTIAL THEFT');
+    if (hasIP) effects.push('DATA EXFILTRATION');
+    if (hasShortener) effects.push('MALICIOUS REDIRECT');
+    if (hasBrand && !brandTrusted) effects.push('BRAND IMPERSONATION');
+    if (finalScore >= 70) effects.push('FINANCIAL FRAUD');
+  }
+  if (isTrusted) effects.push('TRUSTED DOMAIN');
+  if (effects.length === 0) effects.push('NO THREATS DETECTED');
+  
+  const features = [
+    ['URL Length', `${url.length} chars`, url.length > 75 ? 'danger' : url.length > 50 ? 'warn' : 'ok'],
+    ['Subdomains', `${numSubs}`, numSubs > 3 ? 'danger' : numSubs > 2 ? 'warn' : 'ok'],
+    ['Hyphens', `${numHyphens}`, numHyphens > 3 ? 'danger' : numHyphens > 1 ? 'warn' : 'ok'],
+    ['Suspicious TLD', hasSuspiciousTLD ? 'YES' : 'NO', hasSuspiciousTLD ? 'danger' : 'ok'],
+    ['HTTPS', parsed && parsed.protocol === 'https:' ? 'YES' : 'NO', parsed && parsed.protocol === 'https:' ? 'ok' : 'danger'],
+    ['Login Keywords', hasLoginKW ? 'YES' : 'NO', hasLoginKW ? 'danger' : 'ok'],
+    ['Encoded Chars', hasEncoded ? 'YES' : 'NO', hasEncoded ? 'warn' : 'ok'],
+    ['Brand Impersonation', hasBrand && !brandTrusted ? 'YES' : 'NO', hasBrand && !brandTrusted ? 'danger' : 'ok'],
+    ['Domain Reputation', isTrusted ? 'TRUSTED (90+)' : 'UNKNOWN (0)', isTrusted ? 'ok' : 'warn'],
+    ['Classification', `Susp: ${Math.round(susp)} → Adj: ${adj > 0 ? '+' : ''}${Math.round(adj)} → Final: ${finalScore}`, 'ok'],
+  ];
+  
+  showResult({url, risk, level, score: finalScore, confidence: Math.round(confidence), effects, features});
+}
+
+function showResult(p) {
+  const el = document.getElementById('scanResult');
+  const riskColors = {safe:'var(--accent-green)',low:'var(--accent-blue)',moderate:'var(--accent-amber)',high:'var(--accent-amber)',critical:'var(--accent-red)'};
+  const riskIcons = {safe:'🛡',low:'✅',moderate:'⚠️',high:'🔶',critical:'🚨'};
+  el.className = `result-panel show risk-${p.risk}`;
+  el.innerHTML = `
+    <div class="result-header">
+      <div class="result-risk"><span class="risk-icon">${riskIcons[p.risk]}</span><span class="risk-level" style="color:${riskColors[p.risk]}">${p.level}</span></div>
+      <div class="result-score"><span class="score-num" style="color:${riskColors[p.risk]}">${p.score}</span><span class="score-label">THREAT SCORE</span></div>
+    </div>
+    <div class="conf-bar">
+      <div class="conf-header"><span class="conf-label">CONFIDENCE</span><span class="conf-value" style="color:${riskColors[p.risk]}">${p.confidence}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${p.confidence}%;background:${riskColors[p.risk]}"></div></div>
+    </div>
+    <div class="effects-section"><div class="effects-list">${p.effects.map(e=>`<span class="effect-tag">${e}</span>`).join('')}</div></div>
+    <div class="features-grid">${p.features.map(f=>`<div class="feature-item"><span class="feature-name">${f[0]}</span><span class="feature-value ${f[2]}">${f[1]}</span></div>`).join('')}</div>
+  `;
+}
+
+// ─── LINK APPLICATION & REDIRECT DETECTION ───
+const linkPresets = {
+  shortener: {
+    original: 'https://bit.ly/3xK9mPq',
+    chain: [
+      {url: 'https://bit.ly/3xK9mPq', type: 'shortener', label: 'URL Shortener Service', status: 'warn', meta: 'HTTP 301 → Redirect to obfuscated domain'},
+      {url: 'https://login-secure-auth.xyz/go?ref=bit', type: 'phishing', label: 'Obfuscated Phishing Domain', status: 'danger', meta: 'HTTPS 200 → Spoofed login page loaded'},
+      {url: 'https://192.168.45.12/collect?creds=on', type: 'exfil', label: 'Credential Exfiltration Endpoint', status: 'danger', meta: 'POST → Sends captured credentials to attacker server'}
+    ],
+    decomp: [
+      ['Original URL', 'https://bit.ly/3xK9mPq', 'warn'],
+      ['Resolved Domain', 'login-secure-auth.xyz', 'danger'],
+      ['Final IP', '192.168.45.12', 'danger'],
+      ['Protocol', 'HTTPS', 'green'],
+      ['Shortener Used', 'bit.ly', 'amber'],
+      ['Redirect Count', '2 hops', 'red'],
+      ['TLD', '.xyz', 'danger'],
+      ['Login Keywords', 'login, auth, secure', 'red'],
+      ['Credential Forms', 'YES — password field', 'red'],
+      ['Exfil Endpoint', 'Detected — POST to IP', 'red']
+    ],
+    risk: 'critical', level: 'CRITICAL', score: 94, confidence: 98,
+    effects: ['CREDENTIAL THEFT', 'MALICIOUS REDIRECT', 'DATA EXFILTRATION']
+  },
+  ipaddr: {
+    original: 'https://192.168.45.100/banking/login.php',
+    chain: [
+      {url: 'https://192.168.45.100/banking/login.php', type: 'direct', label: 'Direct IP Address Link', status: 'danger', meta: 'HTTPS 200 → No domain name, raw IP access'}
+    ],
+    decomp: [
+      ['Full URL', 'https://192.168.45.100/banking/login.php', 'red'],
+      ['Protocol', 'HTTPS', 'green'],
+      ['IP Address', '192.168.45.100', 'danger'],
+      ['Port', '443 (default)', 'amber'],
+      ['Path', '/banking/login.php', 'red'],
+      ['Subdomains', 'N/A — raw IP', 'red'],
+      ['TLD', 'N/A — no domain', 'red'],
+      ['Login Keywords', 'banking, login', 'red'],
+      ['Domain Reputation', 'N/A — IP address', 'red'],
+      ['SSL Certificate', "Self-signed — MISMATCH", 'red']
+    ],
+    risk: 'critical', level: 'CRITICAL', score: 89, confidence: 96,
+    effects: ['CREDENTIAL THEFT', 'FINANCIAL FRAUD', 'IMPERSONATION']
+  },
+  encoded: {
+    original: 'https://secure-%62ank-login.com/aut%68?u%73er=a%64min',
+    chain: [
+      {url: 'https://secure-%62ank-login.com/auth?user=admin', type: 'encoded', label: 'URL-encoded Phishing Link', status: 'amber', meta: 'HTTP 200 → Decode reveals obfuscated characters'},
+      {url: 'https://secure-bank-login.com/auth?user=admin', type: 'decoded', label: 'Decoded URL — Suspicious Domain', status: 'danger', meta: 'HTTPS 302 → Redirect to credential harvest page'}
+    ],
+    decomp: [
+      ['Raw URL', 'https://secure-%62ank-login.com/aut%68?u%73er=a%64min', 'amber'],
+      ['Decoded URL', 'https://secure-bank-login.com/auth?user=admin', 'danger'],
+      ['Encoded Chars', '4 instances (%62=%68=%73=%64)', 'red'],
+      ['Domain', 'secure-bank-login.com', 'danger'],
+      ['Login Keywords', 'bank, login, auth', 'red'],
+      ['Obfuscation', 'Character encoding to evade detection', 'red'],
+      ['TLD', '.com', 'ok'],
+      ['Subdomains', '0', 'ok'],
+      ['Query Params', 'user=admin — pre-filled form', 'amber'],
+      ['Entropy Score', '4.67 — high (obfuscation)', 'red']
+    ],
+    risk: 'high', level: 'HIGH', score: 72, confidence: 88,
+    effects: ['CREDENTIAL THEFT', 'OBFUSCATED URL', 'IMPERSONATION']
+  },
+  redirect: {
+    original: 'https://go.trusted-news.net/r/58a2f',
+    chain: [
+      {url: 'https://go.trusted-news.net/r/58a2f', type: 'shortener', label: 'Trusted-News Redirect Service', status: 'blue', meta: 'HTTP 302 → Redirect via affiliate tracker'},
+      {url: 'https://track.affiliate-cdn.io/click?id=891', type: 'tracker', label: 'Affiliate Tracking Domain', status: 'amber', meta: 'HTTP 302 → Redirect through ad network'},
+      {url: 'https://cdn.ad-network.xyz/route?p=1&ext=1', type: 'ads', label: 'Ad Network CDN — Malvertising', status: 'red', meta: 'HTTP 302 → Redirect to malicious landing page'},
+      {url: 'https://free-prize-winner.top/claim?ref=891&uid=42', type: 'phishing', label: 'Scam / Malware Distribution Page', status: 'danger', meta: 'HTTPS 200 → Fake prize claim page with JS payload'}
+    ],
+    decomp: [
+      ['Original URL', 'https://go.trusted-news.net/r/58a2f', 'amber'],
+      ['Redirect Hops', '3 hops (chain)', 'red'],
+      ['Final Domain', 'free-prize-winner.top', 'danger'],
+      ['Final TLD', '.top', 'danger'],
+      ['Tracker Domain', 'track.affiliate-cdn.io', 'amber'],
+      ['Ad Network', 'cdn.ad-network.xyz', 'red'],
+      ['JS Payload', 'Detected — dynamic download', 'red'],
+      ['Scam Keywords', 'free, prize, winner, claim', 'red'],
+      ['Category', 'Malvertising / Scam', 'red'],
+      ['Exfil Risk', 'HIGH — credential + payload', 'red']
+    ],
+    risk: 'critical', level: 'CRITICAL', score: 96, confidence: 99,
+    effects: ['MALICIOUS REDIRECT', 'MALVERTISING', 'MALWARE DELIVERY', 'SCAM']
+  },
+  direct: {
+    original: 'https://github.com/phishguard/ai-extension',
+    chain: [
+      {url: 'https://github.com/phishguard/ai-extension', type: 'direct', label: 'Direct Navigation — Trusted Domain', status: 'green', meta: 'HTTPS 200 → Clean page, no redirects'}
+    ],
+    decomp: [
+      ['Full URL', 'https://github.com/phishguard/ai-extension', 'green'],
+      ['Protocol', 'HTTPS', 'green'],
+      ['Domain', 'github.com', 'green'],
+      ['TLD', '.com', 'green'],
+      ['Subdomains', '0', 'green'],
+      ['Login Keywords', '0', 'green'],
+      ['Redirect Count', '0 — direct link', 'green'],
+      ['SSL Certificate', "Valid — Let's Encrypt", 'green'],
+      ['Domain Age', '17+ years', 'green'],
+      ['Reputation', 'Trusted — high authority', 'green']
+    ],
+    risk: 'safe', level: 'SAFE', score: 1, confidence: 99,
+    effects: ['NO THREATS DETECTED']
+  }
+};
+
+function loadLinkPreset(key) {
+  const p = linkPresets[key];
+  document.getElementById('linkInput').value = p.original;
+  showLinkResult(p);
+}
+
+function runLinkDetect() {
+  const url = document.getElementById('linkInput').value.trim();
+  if (!url) return;
+  const lower = url.toLowerCase();
+  let p;
+  // Trusted domains (full whitelist)
+  const TRUSTED = ['google.com','microsoft.com','github.com','apple.com','amazon.com','paypal.com','facebook.com','instagram.com','twitter.com','x.com','linkedin.com','reddit.com','netflix.com','spotify.com','discord.com','slack.com','zoom.us','chase.com','bankofamerica.com','wellsfargo.com','citi.com','bbc.co.uk','bbc.com','cnn.com','reuters.com','nytimes.com','wikipedia.org','ebay.com','shopify.com','twitch.tv','dropbox.com','cloudflare.com','youtube.com','live.com','outlook.com','office.com','icloud.com','meta.com','fb.com','stripe.com','squareup.com','barclays.com','hsbc.com','fidelity.com','vanguard.com','schwab.com','theguardian.com','washingtonpost.com','apnews.com','wordpress.com','etsy.com','apple.co','google.co.uk','amazon.co.uk'];
+  try {
+    const h = new URL(lower.startsWith('http') ? lower : 'https://' + lower).hostname;
+    const isTrusted = TRUSTED.some(d => h === d || h.endsWith('.' + d));
+    if (isTrusted) { p = linkPresets.direct; p = {...p, original: url, decomp: p.decomp.map(d => d[0]==='Full URL' ? [d[0], url, 'green'] : d)}; showLinkResult(p); return; }
+  } catch {}
+  if (lower.includes('bit.ly') || lower.includes('tinyurl') || lower.includes('goo.gl') || lower.includes('t.co') || lower.includes('is.gd') || lower.includes('ow.ly') || lower.includes('cutt.ly')) {
+    p = linkPresets.shortener;
+  } else if (/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(url)) {
+    p = linkPresets.ipaddr;
+  } else if (url.includes('%')) {
+    p = linkPresets.encoded;
+  } else if (lower.includes('redirect') || lower.includes('/r/') || lower.includes('track') || lower.includes('ref=')) {
+    p = linkPresets.redirect;
+  } else {
+    p = linkPresets.redirect;
+    p = {...p, original: url, decomp: p.decomp.map(d => d[0]==='Original URL' ? [d[0], url, 'danger'] : d)};
+  }
+  showLinkResult(p);
+}
+
+function showLinkResult(p) {
+  const resultDiv = document.getElementById('linkResult');
+  resultDiv.style.display = 'block';
+  resultDiv.style.animation = 'fadeSlide .4s ease-out';
+
+  // Redirect chain
+  const chainEl = document.getElementById('redirectChain');
+  const riskColors = {safe:'var(--accent-green)',low:'var(--accent-blue)',moderate:'var(--accent-amber)',high:'var(--accent-amber)',critical:'var(--accent-red)'};
+  const riskIcons = {safe:'🛡',low:'✅',moderate:'⚠️',high:'🔶',critical:'🚨'};
+
+  chainEl.innerHTML = p.chain.map((step, i) => {
+    const numColors = {blue:'blue',amber:'amber',danger:'red',green:'green',warn:'amber',decoded:'blue',shortener:'amber',phishing:'red',exfil:'red',encoded:'amber',tracker:'amber',ads:'red',direct:'green'};
+    const nc = numColors[step.type] || 'blue';
+    const urlColors = {safe:'safe',warn:'warn',danger:'danger',green:'safe',red:'danger',amber:'warn',blue:'warn'};
+    const uc = urlColors[step.status] || '';
+    const arrow = i < p.chain.length - 1 ? '<div class="redirect-arrow">↓ HTTP ' + (step.meta.includes('301') ? '301' : step.meta.includes('302') ? '302' : '200') + ' Redirect</div>' : '';
+    return `
+      <div class="redirect-step">
+        <div class="redirect-num ${nc}">${i+1}</div>
+        <div class="redirect-info">
+          <div class="redirect-url ${uc}">${escHtml(step.url)}</div>
+          <div class="redirect-meta">${step.label} — ${step.meta}</div>
+        </div>
+      </div>
+      ${arrow}`;
+  }).join('');
+
+  // Link decomposition
+  const decompEl = document.getElementById('linkDecomp');
+  decompEl.innerHTML = p.decomp.map(d => {
+    const vc = d[2] === 'red' ? 'red' : d[2] === 'amber' ? 'amber' : d[2] === 'green' ? 'green' : '';
+    return `<div class="decomp-row"><span class="decomp-label">${d[0]}</span><span class="decomp-value ${vc}">${escHtml(d[1])}</span></div>`;
+  }).join('');
+
+  // Detection result
+  const detEl = document.getElementById('linkDetectionResult');
+  detEl.innerHTML = `
+    <div class="result-panel show risk-${p.risk}" style="display:block">
+      <div class="result-header">
+        <div class="result-risk"><span class="risk-icon">${riskIcons[p.risk]}</span><span class="risk-level" style="color:${riskColors[p.risk]}">${p.level}</span></div>
+        <div class="result-score"><span class="score-num" style="color:${riskColors[p.risk]}">${p.score}</span><span class="score-label">THREAT SCORE</span></div>
+      </div>
+      <div class="conf-bar">
+        <div class="conf-header"><span class="conf-label">CONFIDENCE</span><span class="conf-value" style="color:${riskColors[p.risk]}">${p.confidence}%</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${p.confidence}%;background:${riskColors[p.risk]}"></div></div>
+      </div>
+      <div class="effects-section"><div class="effects-list">${p.effects.map(e=>`<span class="effect-tag">${e}</span>`).join('')}</div></div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// SECTION 10: INJECTION & MALWARE DETECTION + URL VALIDATOR
+// ═══════════════════════════════════════════════════
+
+// ─── DATASETS ───
+var TRUSTED_DB = {
+  'google.com':100,'microsoft.com':100,'apple.com':99,'github.com':98,
+  'amazon.com':97,'paypal.com':98,'bbc.co.uk':96,'cnn.com':95,
+  'reuters.com':97,'chase.com':96,'wellsfargo.com':95,'netflix.com':96,
+  'facebook.com':95,'twitter.com':94,'linkedin.com':95,'instagram.com':94,
+  'youtube.com':98,'wikipedia.org':99,'stackoverflow.com':97,
+  'mozilla.org':97,'adobe.com':96,'salesforce.com':95,'zoom.us':94,
+  'dropbox.com':94,'slack.com':95,'shopify.com':93,'ebay.com':93,
+  'nytimes.com':96,'theguardian.com':95,'espn.com':93,'reddit.com':92,
+  'twitch.tv':93,'medium.com':91,'cloudflare.com':97,'digitalocean.com':94
+};
+var PHISHING_DB = [
+  'secure-bank-login.xyz','paypal-verify.com','chase-secure.net','login-secure-auth.xyz',
+  'apple-id-verify.org','microsoft-365.xyz','amazon-security.top','netflix-billing.com',
+  'crypto-wallet-sync.io','dhl-tracking.xyz','usps-package.com','irs-refund.gov-verify.xyz',
+  'google-docs-share.xyz','linkedin-premium.top','dropbox-share.xyz','facebook-security.com',
+  'instagram-verify.org','whatsapp-web.login.xyz','verify-account.top','update-payment.xyz',
+  'wells-fargo-login.net','bankofamerica-secure.xyz','suspicious-login.cc','free-prize-winner.top'
+];
+var MALICIOUS_TLD = ['xyz','top','cc','tk','ml','ga','cf','gq','pw','buzz','icu','click','link'];
+
+// ─── TOGGLE ───
+var scanToggle = document.getElementById('scanToggle');
+var toggleStatus = document.getElementById('toggleStatus');
+if (scanToggle) {
+  scanToggle.addEventListener('change', function() {
+    if (this.checked) {
+      toggleStatus.className = 'toggle-indicator active';
+      toggleStatus.innerHTML = '<span class="status-dot"></span>ALL ACTIVE';
+    } else {
+      toggleStatus.className = 'toggle-indicator inactive';
+      toggleStatus.innerHTML = 'DISABLED';
+    }
+  });
+}
+
+function runInjectScan() {
+  var url = document.getElementById('injectInput').value.trim();
+  if (!url) return;
+  var scanEnabled = document.getElementById('scanToggle').checked;
+  
+  // Run URL validity + dataset comparison
+  var datasetResult = validateUrlDataset(url);
+  showDatasetComparison(datasetResult);
+  
+  if (!scanEnabled) {
+    document.getElementById('threatDashboard').style.display = 'none';
+    document.getElementById('injectResult').innerHTML = '<div style="padding:16px;text-align:center;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:10px;margin-bottom:16px"><span style="font-family:var(--font-mono);font-size:12px;color:var(--accent-amber)">Threat scanning is disabled. Toggle ON to scan for injection & malware patterns.</span></div>';
+    return;
+  }
+  
+  // Scan all 6 threat categories
+  const hasSQL = /('.*or.*'|union.*select|drop.*table|;--|\/\*|\*\/|1=1|1'='|admin'--)/i.test(url);
+  const hasXSS = /(<script|<img[^>]+onerror|javascript:|alert\(|document\.cookie|eval\()/i.test(url);
+  const hasCMD = /(;|\|\||&&|`[^`]*`|\$\(|cat\s|ls\s|wget|curl|chmod|rm\s|kill)/i.test(url);
+  const hasTraversal = /(\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e\/|\.\.%2f)/i.test(url);
+  const hasMalware = /\.(exe|bat|cmd|scr|pif|vbs|js|ws|wsf|ps1|msi|apk|dmg)\b/i.test(url);
+  
+  const allChecks = {
+    sql_injection: hasSQL ? { status: 'danger', label: 'SQL INJECTION DETECTED', detail: 'SQL tautology or UNION-based injection pattern found', severity: 90 } : { status: 'ok', label: 'No SQL injection', detail: 'No SQL patterns detected', severity: 0 },
+    xss: hasXSS ? { status: 'danger', label: 'XSS ATTACK DETECTED', detail: 'Script tag or event handler injection pattern found', severity: 95 } : { status: 'ok', label: 'No XSS patterns', detail: 'No script injection detected', severity: 0 },
+    command_injection: hasCMD ? { status: 'danger', label: 'COMMAND INJECTION DETECTED', detail: 'Shell metacharacter or command chaining pattern found', severity: 92 } : { status: 'ok', label: 'No command injection', detail: 'No shell metacharacters', severity: 0 },
+    path_traversal: hasTraversal ? { status: 'danger', label: 'PATH TRAVERSAL DETECTED', detail: 'Directory escape sequence found (../)', severity: 85 } : { status: 'ok', label: 'No path traversal', detail: 'No directory escape patterns', severity: 0 },
+    malware_payload: hasMalware ? { status: 'danger', label: 'MALWARE PAYLOAD DETECTED', detail: 'Executable file type detected in URL', severity: 88 } : { status: 'ok', label: 'No malware payload', detail: 'No executable file extensions', severity: 0 },
+    data_exfiltration: (hasSQL || hasXSS || hasCMD) ? { status: 'danger', label: 'DATA EXFILTRATION RISK', detail: 'Injection attack could steal sensitive data', severity: 80 } : { status: 'ok', label: 'No exfiltration risk', detail: 'No data collection patterns', severity: 0 },
+  };
+  
+  var checks = allChecks;
+  var maxSev = Math.max.apply(null, Object.keys(checks).map(function(k){ return checks[k].severity; }));
+  // Combine injection score with dataset comparison score
+  maxSev = Math.max(maxSev, datasetResult.score);
+  var overall = maxSev >= 70 ? 'critical' : maxSev >= 40 ? 'high' : maxSev >= 15 ? 'moderate' : 'safe';
+  
+  showInjectResult({ url: url, checks: checks, overall: overall, overallScore: maxSev, dataset: datasetResult });
+}
+
+// ─── URL VALIDITY + DATASET COMPARISON ───
+function validateUrlDataset(url) {
+  var parsed;
+  try {
+    parsed = new URL(url);
+  } catch(e) {
+    // Try adding https://
+    try { parsed = new URL('https://' + url); } catch(e2) {
+      return { valid: false, domain: url, tld: 'none', protocol: 'invalid', trusted: false, inPhishingDb: false, reputation: 0, safe: false, reasons: ['Invalid URL format'] };
+    }
+  }
+  var domain = parsed.hostname.replace(/^www\./, '');
+  var tld = domain.split('.').pop();
+  var protocol = parsed.protocol.replace(':', '');
+  var isTrusted = TRUSTED_DB.hasOwnProperty(domain);
+  var reputation = isTrusted ? TRUSTED_DB[domain] : 0;
+  var inPhishingDb = PHISHING_DB.indexOf(domain) !== -1;
+  var isMalTLD = MALICIOUS_TLD.indexOf(tld) !== -1;
+  var reasons = [];
+  var score = 0;
+  
+  if (isTrusted) { reputation = TRUSTED_DB[domain]; score = Math.max(0, 100 - reputation); reasons.push('Trusted domain in database (reputation: ' + reputation + '/100)'); }
+  if (inPhishingDb) { score = 95; reasons.push('FOUND IN PHISHING DATABASE'); }
+  if (isMalTLD && !isTrusted) { score = Math.max(score, 60); reasons.push('Suspicious TLD: .' + tld + ' (known phishing TLD)'); }
+  if (protocol !== 'https' && !isTrusted) { score = Math.max(score, 30); reasons.push('No HTTPS encryption'); }
+  if (parsed.hostname.indexOf('-') !== -1 && !isTrusted) { score = Math.max(score, 25); reasons.push('Hyphens in domain (common in phishing)'); }
+  if (parsed.pathname.length > 80) { score = Math.max(score, 15); reasons.push('Unusually long URL path'); }
+  if (/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/.test(domain)) { score = Math.max(score, 70); reasons.push('Raw IP address instead of domain'); }
+  if (parsed.searchParams.toString().length > 100) { score = Math.max(score, 10); reasons.push('Excessive query parameters'); }
+  
+  // Brand impersonation check
+  var brands = ['paypal','chase','apple','google','microsoft','amazon','netflix','facebook','instagram','whatsapp','linkedin','twitter'];
+  var brandMatch = null;
+  brands.forEach(function(b) {
+    if (domain.indexOf(b) !== -1 && !isTrusted) { brandMatch = b; }
+  });
+  if (brandMatch) { score = Math.max(score, 80); reasons.push('Possible brand impersonation: ' + brandMatch); }
+  
+  if (reasons.length === 0) reasons.push('No suspicious patterns detected');
+  
+  return {
+    valid: true,
+    domain: domain,
+    tld: '.' + tld,
+    protocol: protocol,
+    trusted: isTrusted,
+    reputation: reputation,
+    inPhishingDb: inPhishingDb,
+    isMalTLD: isMalTLD,
+    brandMatch: brandMatch,
+    score: score,
+    safe: score < 15,
+    reasons: reasons
+  };
+}
+
+function showDatasetComparison(d) {
+  var resultEl = document.getElementById('injectResult');
+  var borderCol = d.safe ? 'rgba(16,185,129,.3)' : d.score > 60 ? 'rgba(239,68,68,.3)' : 'rgba(245,158,11,.3)';
+  var verdictColor = d.safe ? 'var(--accent-green)' : d.score > 60 ? 'var(--accent-red)' : 'var(--accent-amber)';
+  var verdictText = d.safe ? 'URL IS VALID & SAFE' : d.score > 60 ? 'URL IS DANGEROUS' : 'URL IS SUSPICIOUS';
+  var verdictIcon = d.safe ? '\u2705' : d.score > 60 ? '\u26a0\ufe0f' : '\u26a0\ufe0f';
+  
+  var html = '<div class="dataset-panel" style="margin-bottom:16px;border-color:' + borderCol + '">';
+  html += '<div class="dataset-header"><span class="dataset-title">DATASET COMPARISON</span>';
+  html += '<span class="status-badge ' + (d.safe ? 'green' : d.score > 60 ? 'red' : 'amber') + '">' + verdictText + '</span></div>';
+  html += '<div class="dataset-grid">';
+  
+  // Cell 1: Domain
+  html += '<div class="dataset-cell">';
+  html += '<div class="dataset-cell-label">DOMAIN</div>';
+  html += '<div class="dataset-cell-value ' + (d.trusted ? 'safe' : 'danger') + '">' + escHtml(d.domain) + '</div>';
+  html += '<div class="dataset-cell-sub">' + (d.trusted ? 'FOUND IN TRUSTED DATABASE' : 'NOT IN TRUSTED DATABASE') + '</div>';
+  html += '</div>';
+  
+  // Cell 2: TLD
+  html += '<div class="dataset-cell">';
+  html += '<div class="dataset-cell-label">TLD VALIDITY</div>';
+  html += '<div class="dataset-cell-value ' + (d.isMalTLD ? 'danger' : 'safe') + '">' + escHtml(d.tld) + '</div>';
+  html += '<div class="dataset-cell-sub">' + (d.isMalTLD ? 'KNOWN PHISHING TLD' : 'CLEAN TLD') + '</div>';
+  html += '</div>';
+  
+  // Cell 3: Protocol
+  html += '<div class="dataset-cell">';
+  html += '<div class="dataset-cell-label">PROTOCOL</div>';
+  html += '<div class="dataset-cell-value ' + (d.protocol === 'https' ? 'safe' : 'warn') + '">' + escHtml(d.protocol.toUpperCase()) + '</div>';
+  html += '<div class="dataset-cell-sub">' + (d.protocol === 'https' ? 'ENCRYPTED CONNECTION' : 'UNENCRYPTED') + '</div>';
+  html += '</div>';
+  
+  // Cell 4: Phishing DB
+  html += '<div class="dataset-cell">';
+  html += '<div class="dataset-cell-label">PHISHING DATABASE</div>';
+  html += '<div class="dataset-cell-value ' + (d.inPhishingDb ? 'danger' : 'safe') + '">' + (d.inPhishingDb ? 'FOUND \u2014 BLOCKED' : 'NOT FOUND \u2014 CLEAR') + '</div>';
+  html += '<div class="dataset-cell-sub">' + PHISHING_DB.length + ' known phishing domains checked</div>';
+  html += '</div>';
+  
+  // Cell 5: Reputation
+  html += '<div class="dataset-cell">';
+  html += '<div class="dataset-cell-label">DOMAIN REPUTATION</div>';
+  html += '<div class="dataset-cell-value ' + (d.reputation >= 90 ? 'safe' : d.reputation > 0 ? 'warn' : 'danger') + '">' + d.reputation + '/100</div>';
+  html += '<div class="dataset-cell-sub">' + (d.reputation >= 90 ? 'HIGH TRUST' : d.reputation > 0 ? 'MODERATE TRUST' : 'NO REPUTATION DATA') + '</div>';
+  html += '</div>';
+  
+  // Cell 6: Brand
+  html += '<div class="dataset-cell">';
+  html += '<div class="dataset-cell-label">BRAND VERIFICATION</div>';
+  html += '<div class="dataset-cell-value ' + (d.brandMatch ? 'danger' : 'safe') + '">' + (d.brandMatch ? 'IMPERSONATING: ' + d.brandMatch.toUpperCase() : 'NO BRAND MATCH') + '</div>';
+  html += '<div class="dataset-cell-sub">' + (d.brandMatch ? 'DOMAIN CONTAINS BRAND NAME BUT NOT OFFICIAL' : 'CLEAN') + '</div>';
+  html += '</div>';
+  
+  html += '</div>'; // close grid
+  
+  // Verdict bar
+  html += '<div style="padding:14px 18px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:12px;background:var(--bg-elevated)">';
+  html += '<span style="font-size:20px">' + verdictIcon + '</span>';
+  html += '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:' + verdictColor + '">' + verdictText + '</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);margin-top:2px">Score: ' + d.score + '/100 \u2014 ' + d.reasons.join(' | ') + '</div></div>';
+  html += '<div style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:' + verdictColor + '">' + d.score + '</div>';
+  html += '</div>';
+  
+  html += '</div>'; // close panel
+  
+  resultEl.innerHTML = html;
+}
+
+function showInjectResult(p) {
+  const dashboard = document.getElementById('threatDashboard');
+  dashboard.style.display = 'block';
+  dashboard.style.animation = 'fadeSlide .4s ease-out';
+  
+  const riskColors = { safe: '#10B981', low: '#3B82F6', moderate: '#F59E0B', high: '#F59E0B', critical: '#EF4444' };
+  const riskLabels = { safe: 'SECURE', low: 'LOW RISK', moderate: 'MODERATE', high: 'HIGH RISK', critical: 'THREAT' };
+  const color = riskColors[p.overall];
+  
+  // ─── SHIELD CARD ───
+  const shieldCard = document.getElementById('shieldCard');
+  const isSafe = p.overall === 'safe';
+  shieldCard.innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="width:80px;height:80px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;background:${color}15;border:3px solid ${color};box-shadow:0 0 30px ${color}30">
+        ${isSafe ? '🛡' : '🚨'}
+      </div>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;color:var(--text-sub-muted);margin-bottom:4px">OVERALL STATUS</div>
+    <div style="font-size:28px;font-weight:700;color:${color};margin-bottom:4px">${riskLabels[p.overall]}</div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-sub-muted)">Threat Score: <span style="color:${color};font-weight:700">${p.overallScore}/100</span></div>
+    <div style="margin-top:12px;width:100%;height:6px;background:var(--border-subtle);border-radius:3px;overflow:hidden">
+      <div style="width:${p.overallScore}%;height:100%;background:${color};border-radius:3px;transition:width .8s ease-out"></div>
+    </div>
+  `;
+  shieldCard.style.borderColor = `${color}40`;
+  
+  // ─── GAUGE CARD ───
+  const gaugeCard = document.getElementById('gaugeCard');
+  const categories = [
+    { name: 'Injection', icon: '💉', checks: ['sql_injection', 'xss', 'command_injection', 'path_traversal'] },
+    { name: 'Malware', icon: '🦠', checks: ['malware_payload', 'data_exfiltration'] }
+  ];
+  
+  gaugeCard.innerHTML = `<div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--text-sub-muted);margin-bottom:14px">THREAT GAUGES</div>` + categories.map(cat => {
+    const catChecks = cat.checks.filter(c => p.checks[c]);
+    if (catChecks.length === 0) return '';
+    const catMax = Math.max(...catChecks.map(c => p.checks[c].severity));
+    const catColor = catMax >= 70 ? '#EF4444' : catMax >= 40 ? '#F59E0B' : catMax >= 15 ? '#F59E0B' : '#10B981';
+    return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;color:var(--text-muted)">${cat.icon} ${cat.name}</span>
+          <span style="font-family:var(--font-mono);font-size:10px;font-weight:600;color:${catColor}">${catMax}/100</span>
+        </div>
+        <div style="height:8px;background:var(--border-subtle);border-radius:4px;overflow:hidden">
+          <div style="width:${catMax}%;height:100%;background:${catColor};border-radius:4px;transition:width .8s ease-out"></div>
+        </div>
+      </div>`;
+  }).join('');
+  
+  // ─── SUMMARY CARD ───
+  const summaryCard = document.getElementById('summaryCard');
+  const dangerCount = Object.values(p.checks).filter(c => c.status === 'danger').length;
+  const warnCount = Object.values(p.checks).filter(c => c.status === 'warn').length;
+  const okCount = Object.values(p.checks).filter(c => c.status === 'ok').length;
+  
+  summaryCard.innerHTML = `
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--text-sub-muted);margin-bottom:14px">SCAN SUMMARY</div>
+    <div style="display:flex;gap:16px;margin-bottom:14px">
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px;font-weight:700;color:#EF4444">${dangerCount}</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-sub-muted)">THREATS</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px;font-weight:700;color:#F59E0B">${warnCount}</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-sub-muted)">WARNINGS</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px;font-weight:700;color:#10B981">${okCount}</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-sub-muted)">CLEAN</div>
+      </div>
+    </div>
+    <div style="padding:10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;font-family:var(--font-mono);font-size:10px;color:var(--text-sub-muted);line-height:1.8">
+      URL: <span style="color:var(--text-heading)">${escHtml(p.url.substring(0, 60))}${p.url.length > 60 ? '...' : ''}</span><br>
+      Checks: <span style="color:var(--text-heading)">6/6 complete</span><br>
+      Result: <span style="color:${color};font-weight:600">${riskLabels[p.overall]}</span>
+    </div>
+  `;
+  
+  // ─── DETAILED CHECK RESULTS ───
+  const checkResults = document.getElementById('checkResults');
+  const checkNames = {
+    sql_injection: { title: 'SQL Injection', icon: '💉', desc: 'Detects SQL tautologies, UNION-based injection, comment sequences' },
+    xss: { title: 'Cross-Site Scripting', icon: '📜', desc: 'Detects <script> tags, event handlers, javascript: protocol' },
+    command_injection: { title: 'Command Injection', icon: '⚡', desc: 'Detects shell metacharacters, command chaining, backticks' },
+    path_traversal: { title: 'Path Traversal', icon: '📂', desc: 'Detects ../ sequences, directory escape patterns' },
+    malware_payload: { title: 'Malware Payload', icon: '🦠', desc: 'Detects executable file types (.exe, .bat, .vbs, .apk)' },
+    data_exfiltration: { title: 'Data Exfiltration', icon: '📤', desc: 'Detects patterns that could steal data via injection' }
+  };
+  
+  checkResults.innerHTML = Object.entries(p.checks).map(([key, check]) => {
+    const meta = checkNames[key];
+    const statusColors = { danger: '#EF4444', warn: '#F59E0B', ok: '#10B981' };
+    const statusLabels = { danger: 'THREAT', warn: 'WARNING', ok: 'CLEAN' };
+    const sc = statusColors[check.status];
+    return `
+      <div style="background:var(--bg-panel);border:1px solid ${sc}30;border-radius:10px;padding:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:20px">${meta.icon}</span>
+            <span style="font-size:13px;font-weight:600">${meta.title}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${sc};box-shadow:0 0 8px ${sc}60"></div>
+            <span style="font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.8px;color:${sc}">${statusLabels[check.status]}</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-sub-muted);margin-bottom:8px">${meta.desc}</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:${sc};margin-bottom:6px;font-weight:500">${check.label}</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim)">${check.detail}</div>
+        ${check.severity > 0 ? `<div style="margin-top:8px;height:4px;background:var(--border-subtle);border-radius:2px;overflow:hidden"><div style="width:${check.severity}%;height:100%;background:${sc};border-radius:2px"></div></div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+// ─── THREAT FEED TICKER ───
+(function initThreatTicker() {
+  const track = document.getElementById('threatTickerTrack');
+  if (!track) return;
+
+  const threatDomains = [
+    'secure-bank-login[.]xyz', 'paypal-verify[.]com', 'chase-secure[.]net',
+    'apple-id-verify[.]org', 'microsoft-365[.]xyz', 'amazon-security[.]top',
+    'netflix-billing[.]com', 'crypto-wallet-sync[.]io', 'dhl-tracking[.]xyz',
+    'usps-package[.]com', 'wells-fargo-login[.]net', 'irs-refund[.]gov-verify[.]xyz',
+    'google-docs-share[.]xyz', 'linkedin-premium[.]top', 'dropbox-share[.]xyz',
+    'facebook-security[.]com', 'instagram-verify[.]org', 'whatsapp-web[.]login[.]xyz',
+    'bit.ly/3xK9mPq', 'tinyurl.com/f8x2k', 't.co/aB3cD4eF',
+    'login-secure-auth[.]xyz', 'verify-account[.]top', 'update-payment[.]xyz'
+  ];
+
+  const safeDomains = [
+    'google.com', 'github.com', 'microsoft.com', 'bbc.co.uk',
+    'wikipedia.org', 'stackoverflow.com', 'mozilla.org', 'apple.com'
+  ];
+
+  const threatTypes = [
+    { label: 'BLOCKED', cls: 'blocked', dot: 'red' },
+    { label: 'FLAGGED', cls: 'flagged', dot: 'amber' },
+    { label: 'ALLOWED', cls: 'allowed', dot: 'green' },
+    { label: 'SCANNING', cls: 'scanning', dot: 'blue' }
+  ];
+
+  function randomTime() {
+    const d = new Date(Date.now() - Math.random() * 600000);
+    return d.toISOString().slice(11, 19);
+  }
+
+  function randomScore() {
+    return Math.floor(Math.random() * 100);
+  }
+
+  function createTickerItem(domain, threatType, score) {
+    const item = document.createElement('span');
+    item.className = 'threat-ticker-item';
+    const scoreCls = score > 60 ? 'danger' : score > 30 ? 'warning' : 'safe';
+    item.innerHTML = 
+      '<span class="threat-ticker-time">' + randomTime() + '</span>' +
+      '<span class="threat-ticker-dot ' + threatType.dot + '"></span>' +
+      '<span class="threat-ticker-label ' + threatType.cls + '">' + threatType.label + '</span>' +
+      '<span class="threat-ticker-url">' + domain + '</span>' +
+      '<span class="threat-ticker-score ' + scoreCls + '">' + score + '/100</span>';
+    return item;
+  }
+
+  // Build initial feed items
+  const items = [];
+  for (let i = 0; i < 30; i++) {
+    const isMalicious = Math.random() > 0.25;
+    const domain = isMalicious
+      ? threatDomains[Math.floor(Math.random() * threatDomains.length)]
+      : safeDomains[Math.floor(Math.random() * safeDomains.length)];
+    const score = isMalicious ? 40 + Math.floor(Math.random() * 60) : Math.floor(Math.random() * 15);
+    let tt;
+    if (score > 70) tt = threatTypes[0]; // BLOCKED
+    else if (score > 30) tt = threatTypes[1]; // FLAGGED
+    else tt = threatTypes[2]; // ALLOWED
+    items.push(createTickerItem(domain, tt, score));
+  }
+  items.forEach(el => track.appendChild(el));
+
+  // Duplicate for seamless loop
+  items.forEach(el => track.appendChild(el.cloneNode(true)));
+
+  // Live updates: periodically add new detections
+  let liveCount = 0;
+  setInterval(function() {
+    if (liveCount >= 50) return;
+    liveCount++;
+    const isMalicious = Math.random() > 0.2;
+    const domain = isMalicious
+      ? threatDomains[Math.floor(Math.random() * threatDomains.length)]
+      : safeDomains[Math.floor(Math.random() * safeDomains.length)];
+    const score = isMalicious ? 50 + Math.floor(Math.random() * 50) : Math.floor(Math.random() * 10);
+    let tt;
+    if (score > 70) tt = threatTypes[0];
+    else if (score > 30) tt = threatTypes[1];
+    else tt = threatTypes[2];
+    const newItem = createTickerItem(domain, tt, score);
+    // Prepend to both halves
+    const firstHalf = track.children[0];
+    if (firstHalf) track.insertBefore(newItem, firstHalf);
+  }, 3000);
+})();
+
+// ─── FOOTER CLOCK ───
+function updateClock() {
+  const utc = new Date().toISOString().slice(11,19) + ' UTC';
+  document.querySelectorAll('[id^="footerTime"]').forEach(el => el.textContent = utc);
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

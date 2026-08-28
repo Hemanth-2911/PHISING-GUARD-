@@ -1,0 +1,7 @@
+node_modules/
+scan-history.json
+.freebuff/
+*.log
+*.log.err
+.env
+.env.local
